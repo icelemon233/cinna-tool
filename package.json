@@ -1,0 +1,38 @@
+{
+  "name": "cinnatool",
+  "version": "1.0.0",
+  "description": "CinnaTool - Electron + React + TypeScript + Vite desktop application",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"node scripts/wait-and-launch.js\"",
+    "dev:renderer": "vite",
+    "dev:electron": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron dist/main.js",
+    "build": "tsc -p tsconfig.electron.json && vite build",
+    "start": "electron dist/main.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@vitejs/plugin-react": "^4.4.1",
+    "electron": "^42.3.3",
+    "electron-store": "^11.0.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5.8.3",
+    "uuid": "^14.0.0",
+    "vite": "^6.3.5",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "@types/uuid": "^10.0.0",
+    "concurrently": "^9.1.2",
+    "electron-builder": "^25.1.8"
+  }
+}
