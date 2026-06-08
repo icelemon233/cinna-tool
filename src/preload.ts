@@ -9,4 +9,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // System information
   platform: process.platform,
   version: process.versions.electron,
+
+  // AI Chat: user config store
+  storeSet: (key: string, value: unknown) => ipcRenderer.invoke('store:set', key, value),
+  storeGet: (key: string) => ipcRenderer.invoke('store:get', key),
+
+  // AI Chat: get supported model list
+  getModels: () => ipcRenderer.invoke('get-models'),
 });

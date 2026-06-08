@@ -1,7 +1,7 @@
 {
-  "name": "cinnatool",
+  "name": "cinna-tools",
   "version": "1.0.0",
-  "description": "CinnaTool - Electron + React + TypeScript + Vite desktop application",
+  "description": "CinnaTool - AI Chat & Todo Desktop Application",
   "main": "dist/main.js",
   "scripts": {
     "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"node scripts/wait-and-launch.js\"",
@@ -10,11 +10,14 @@
     "build": "tsc -p tsconfig.electron.json && vite build",
     "start": "electron dist/main.js",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["electron", "react", "typescript", "ai-chat", "todo"],
+  "author": "Cinna",
+  "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",

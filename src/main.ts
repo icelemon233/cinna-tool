@@ -33,6 +33,99 @@ function saveWindowState(state: WindowState): void {
   }
 }
 
+// --- User config store using local JSON file ---
+const configFilePath = path.join(app.getPath('userData'), 'config.json');
+
+function loadConfig(): Record<string, unknown> {
+  try {
+    if (fs.existsSync(configFilePath)) {
+      const data = fs.readFileSync(configFilePath, 'utf-8');
+      return JSON.parse(data) as Record<string, unknown>;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return {};
+}
+
+function saveConfig(config: Record<string, unknown>): void {
+  try {
+    fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2), 'utf-8');
+  } catch {
+    // ignore write errors
+  }
+}
+
+// --- AI Chat model definitions ---
+interface ModelInfo {
+  id: string;
+  name: string;
+  baseUrl: string;
+  model: string;
+  requiresUrl: boolean;
+}
+
+function getModelList(): ModelInfo[] {
+  return [
+    {
+      id: 'gpt-4o',
+      name: 'ChatGPT (OpenAI)',
+      baseUrl: 'https://api.openai.com/v1',
+      model: 'gpt-4o',
+      requiresUrl: false,
+    },
+    {
+      id: 'claude-3-5-sonnet',
+      name: 'Claude (Anthropic)',
+      baseUrl: 'https://api.anthropic.com/v1',
+      model: 'claude-3-5-sonnet-20241022',
+      requiresUrl: false,
+    },
+    {
+      id: 'gemini-2-flash',
+      name: 'Gemini (Google)',
+      baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+      model: 'gemini-2.0-flash',
+      requiresUrl: false,
+    },
+    {
+      id: 'glm-4-flash',
+      name: 'GLM (智谱AI)',
+      baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+      model: 'glm-4-flash',
+      requiresUrl: false,
+    },
+    {
+      id: 'kimi-plus',
+      name: 'Kimi (Moonshot)',
+      baseUrl: 'https://api.moonshot.cn/v1',
+      model: 'moonshot-v1-8k',
+      requiresUrl: false,
+    },
+    {
+      id: 'deepseek-chat',
+      name: 'DeepSeek',
+      baseUrl: 'https://api.deepseek.com/v1',
+      model: 'deepseek-chat',
+      requiresUrl: false,
+    },
+    {
+      id: 'qwen-plus',
+      name: '通义千问 (阿里云)',
+      baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      model: 'qwen-plus',
+      requiresUrl: false,
+    },
+    {
+      id: 'custom',
+      name: '自定义 (OpenAI 兼容接口)',
+      baseUrl: '',
+      model: '',
+      requiresUrl: true,
+    },
+  ];
+}
+
 // --- App-level quit flag for macOS hide-on-close ---
 let isQuitting = false;
 
@@ -95,6 +188,7 @@ function createWindow(): BrowserWindow {
 
 // Register IPC handlers for window operations
 function registerIpcHandlers() {
+  // Window controls
   ipcMain.handle('window:minimize', () => {
     mainWindow?.minimize();
   });
@@ -109,6 +203,24 @@ function registerIpcHandlers() {
 
   ipcMain.handle('window:close', () => {
     mainWindow?.close();
+  });
+
+  // AI Chat: user config store
+  ipcMain.handle('store:set', (_event, key: string, value: unknown) => {
+    const config = loadConfig();
+    config[key] = value;
+    saveConfig(config);
+    return true;
+  });
+
+  ipcMain.handle('store:get', (_event, key: string) => {
+    const config = loadConfig();
+    return config[key] ?? null;
+  });
+
+  // AI Chat: get supported model list
+  ipcMain.handle('get-models', () => {
+    return getModelList();
   });
 }
 
