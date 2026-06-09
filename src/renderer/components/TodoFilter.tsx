@@ -8,7 +8,7 @@ const FilterContainer = styled.div`
   justify-content: space-between;
   padding: 12px 0;
   margin-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 `;
 
 const FilterButtons = styled.div`
@@ -18,10 +18,10 @@ const FilterButtons = styled.div`
 
 const FilterButton = styled.button<{ active: boolean }>`
   padding: 8px 16px;
-  border: 1px solid ${({ active }) => (active ? '#667eea' : '#e2e8f0')};
+  border: 1px solid ${({ active }) => (active ? '#667eea' : 'var(--border-color)')};
   border-radius: 6px;
-  background: ${({ active }) => (active ? '#667eea' : '#fff')};
-  color: ${({ active }) => (active ? '#fff' : '#4a5568')};
+  background: ${({ active }) => (active ? '#667eea' : 'var(--btn-inactive-bg)')};
+  color: ${({ active }) => (active ? '#fff' : 'var(--btn-inactive-text)')};
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -29,20 +29,20 @@ const FilterButton = styled.button<{ active: boolean }>`
 
   &:hover {
     border-color: #667eea;
-    background: ${({ active }) => (active ? '#667eea' : '#ebf4ff')};
+    background: ${({ active }) => (active ? '#667eea' : 'var(--btn-hover-bg)')};
   }
 `;
 
 const Info = styled.span`
   font-size: 13px;
-  color: #718096;
+  color: var(--text-secondary);
 `;
 
 const ClearButton = styled.button`
   padding: 8px 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: #fff;
+  background: var(--clear-btn-bg);
   color: #e53e3e;
   font-size: 13px;
   font-weight: 500;
@@ -50,7 +50,7 @@ const ClearButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: #fff5f5;
+    background: var(--clear-btn-hover-bg);
     border-color: #feb2b2;
   }
 `;

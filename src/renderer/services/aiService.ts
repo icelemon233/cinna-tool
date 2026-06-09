@@ -20,6 +20,33 @@ export type OnErrorCallback = (error: Error) => void;
 
 let abortController: AbortController | null = null;
 
+/** Map HTTP status codes to user-friendly error messages */
+function getHttpErrorMessage(status: number, body?: { error?: { message?: string } }): string {
+  const serverMsg = body?.error?.message;
+  switch (status) {
+    case 401:
+      return serverMsg || 'API Key 无效或已过期';
+    case 403:
+      return serverMsg || '无权访问该 API，请检查 API Key 权限';
+    case 429:
+      return serverMsg || '请求频率超限，请稍后重试';
+    default:
+      if (status >= 500) {
+        return serverMsg || `服务端错误 (HTTP ${status})`;
+      }
+      return serverMsg || `HTTP ${status}`;
+  }
+}
+
+/** Create an AbortSignal that times out after the given milliseconds */
+function createTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { signal: controller.signal, clear: () => clearTimeout(timer) };
+}
+
+const REQUEST_TIMEOUT_MS = 30_000; // 30 seconds
+
 /**
  * Stream chat completion from an OpenAI-compatible API.
  * Supports OpenAI, Claude (via OpenAI-compat proxy), GLM, Kimi, DeepSeek, Qwen, etc.
@@ -45,6 +72,11 @@ export async function streamChat(
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'AbortError') {
       // User stopped generation — not an error
+      return;
+    }
+    // Network errors
+    if (err instanceof TypeError && (err.message.includes('fetch') || err.message.includes('network'))) {
+      onError(new Error('网络连接失败，请检查网络'));
       return;
     }
     onError(err instanceof Error ? err : new Error(String(err)));
@@ -75,27 +107,58 @@ async function streamOpenAICompatible(
   _onError: OnErrorCallback,
   signal: AbortSignal
 ): Promise<void> {
-  const url = `${config.baseUrl}/chat/completions`;
+  const url = config.baseUrl.endsWith('/')
+    ? `${config.baseUrl}chat/completions`
+    : `${config.baseUrl}/chat/completions`;
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: config.model,
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      stream: true,
-    }),
-    signal,
-  });
+  // Ensure system message is present
+  const finalMessages: ChatMessage[] = messages[0]?.role === 'system'
+    ? messages
+    : [{ role: 'system' as const, content: 'You are a helpful assistant.' }, ...messages];
+
+  // Build request body — include thinking for DeepSeek V4 models
+  const isDeepSeekV4 = config.model.startsWith('deepseek-v4');
+  const requestBody: Record<string, unknown> = {
+    model: config.model,
+    messages: finalMessages.map((m) => ({ role: m.role, content: m.content })),
+    stream: true,
+  };
+  if (isDeepSeekV4) {
+    requestBody.thinking = { type: 'enabled' };
+    requestBody.reasoning_effort = 'high';
+  }
+
+  // Combine user abort signal with timeout
+  const timeout = createTimeoutSignal(REQUEST_TIMEOUT_MS);
+  const combinedController = new AbortController();
+  const onAbort = () => combinedController.abort();
+  signal.addEventListener('abort', onAbort);
+  timeout.signal.addEventListener('abort', onAbort);
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(requestBody),
+      signal: combinedController.signal,
+    });
+  } catch (err: unknown) {
+    timeout.clear();
+    if (err instanceof Error && err.name === 'AbortError' && timeout.signal.aborted && !signal.aborted) {
+      throw new Error('请求超时，请检查网络或稍后重试');
+    }
+    throw err;
+  } finally {
+    timeout.clear();
+  }
 
   if (!res.ok) {
-    const errBody = await res.json().catch(() => ({}));
-    throw new Error(
-      (errBody as { error?: { message?: string } }).error?.message || `HTTP ${res.status}`
-    );
+    const errBody = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    throw new Error(getHttpErrorMessage(res.status, errBody));
   }
 
   const reader = res.body?.getReader();
@@ -180,10 +243,8 @@ async function streamClaude(
   });
 
   if (!res.ok) {
-    const errBody = await res.json().catch(() => ({}));
-    throw new Error(
-      (errBody as { error?: { message?: string } }).error?.message || `HTTP ${res.status}`
-    );
+    const errBody = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    throw new Error(getHttpErrorMessage(res.status, errBody));
   }
 
   const reader = res.body?.getReader();
@@ -257,10 +318,8 @@ async function streamGemini(
   });
 
   if (!res.ok) {
-    const errBody = await res.json().catch(() => ({}));
-    throw new Error(
-      (errBody as { error?: { message?: string } }).error?.message || `HTTP ${res.status}`
-    );
+    const errBody = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    throw new Error(getHttpErrorMessage(res.status, errBody));
   }
 
   const reader = res.body?.getReader();
@@ -301,4 +360,34 @@ async function streamGemini(
   }
 
   onDone(fullText);
+}
+
+// ============================================
+// Balance Query
+// ============================================
+
+export interface BalanceInfo {
+  currency: string;
+  total_balance: string;
+  granted_balance: string;
+  topped_up_balance: string;
+}
+
+export interface BalanceResponse {
+  is_available: boolean;
+  balance_infos: BalanceInfo[];
+}
+
+export async function queryBalance(baseUrl: string, apiKey: string): Promise<BalanceResponse> {
+  const url = baseUrl.endsWith('/') ? `${baseUrl}user/balance` : `${baseUrl}/user/balance`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`查询余额失败: HTTP ${res.status}`);
+  }
+  return res.json();
 }

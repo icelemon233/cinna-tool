@@ -15,7 +15,7 @@ const EmptyState = styled.div`
   align-items: center;
   justify-content: center;
   padding: 48px 20px;
-  color: #a0aec0;
+  color: var(--text-muted);
   text-align: center;
 `;
 
@@ -27,6 +27,7 @@ const EmptyIcon = styled.span`
 const EmptyText = styled.p`
   font-size: 16px;
   margin: 0;
+  color: var(--text-secondary);
 `;
 
 interface TodoListProps {

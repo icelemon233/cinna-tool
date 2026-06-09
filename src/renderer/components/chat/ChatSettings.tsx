@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
+import { useTranslation } from '../../i18n';
 import type { ChatSettings } from '../../store/chatStore';
 import type { ModelInfo } from '../../types/electron.d';
 
@@ -9,14 +10,14 @@ const Panel = styled.div<{ open: boolean }>`
   right: 0;
   width: 380px;
   height: 100%;
-  background: #17171f;
-  border-left: 1px solid #2a2a3d;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-color);
   z-index: 100;
   display: flex;
   flex-direction: column;
   transform: translateX(${({ open }) => (open ? '0' : '100%')});
   transition: transform 0.3s ease;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
   pointer-events: ${({ open }) => (open ? 'auto' : 'none')};
 `;
 
@@ -25,20 +26,20 @@ const Header = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 20px 20px 16px;
-  border-bottom: 1px solid #2a2a3d;
+  border-bottom: 1px solid var(--border-color);
 `;
 
 const HeaderTitle = styled.h2`
   font-size: 15px;
   font-weight: 700;
-  color: #e8e8f0;
+  color: var(--text-primary);
   margin: 0;
 `;
 
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: #8888a8;
+  color: var(--text-muted);
   font-size: 16px;
   cursor: pointer;
   padding: 4px 8px;
@@ -46,8 +47,8 @@ const CloseButton = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background: #252536;
-    color: #e8e8f0;
+    background: var(--accent-light);
+    color: var(--text-primary);
   }
 `;
 
@@ -69,17 +70,17 @@ const FormGroup = styled.div<{ hidden?: boolean }>`
 const Label = styled.label`
   font-size: 12px;
   font-weight: 600;
-  color: #8888a8;
+  color: var(--text-secondary);
   letter-spacing: 0.3px;
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 10px 14px;
-  background: #1e1e2a;
-  border: 1px solid #2a2a3d;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #e8e8f0;
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
   cursor: pointer;
@@ -87,31 +88,33 @@ const Select = styled.select`
   appearance: none;
 
   &:focus {
-    border-color: #f59e0b;
+    border-color: var(--accent);
   }
 
   option {
-    background: #1e1e2a;
+    background: var(--bg-card);
+    color: var(--text-primary);
   }
 `;
 
 const Input = styled.input`
   width: 100%;
   padding: 10px 14px;
-  background: #1e1e2a;
-  border: 1px solid #2a2a3d;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #e8e8f0;
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 
   &:focus {
-    border-color: #f59e0b;
+    border-color: var(--accent);
   }
 
   &::placeholder {
-    color: #55556a;
+    color: var(--text-muted);
   }
 `;
 
@@ -129,20 +132,20 @@ const TogglePwdButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   padding: 4px;
-  color: #55556a;
+  color: var(--text-muted);
 
   &:hover {
-    color: #8888a8;
+    color: var(--text-secondary);
   }
 `;
 
 const SaveButton = styled.button`
   width: 100%;
   padding: 12px;
-  background: #f59e0b;
+  background: var(--accent);
   border: none;
   border-radius: 8px;
-  color: #000;
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -150,7 +153,7 @@ const SaveButton = styled.button`
   margin-top: 4px;
 
   &:hover {
-    background: #fbbf24;
+    opacity: 0.9;
   }
 
   &:active {
@@ -173,6 +176,7 @@ const ChatSettingsPanel: React.FC<ChatSettingsProps> = ({
   onClose,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [modelId, setModelId] = useState(settings.modelId);
   const [apiKey, setApiKey] = useState(settings.apiKey);
   const [baseUrl, setBaseUrl] = useState(settings.baseUrl);
@@ -218,14 +222,14 @@ const ChatSettingsPanel: React.FC<ChatSettingsProps> = ({
   return (
     <Panel open={open}>
       <Header>
-        <HeaderTitle>⚙️ 模型设置</HeaderTitle>
+        <HeaderTitle>⚙️ {t('chat.modelSettings')}</HeaderTitle>
         <CloseButton onClick={onClose}>✕</CloseButton>
       </Header>
       <Body>
         <FormGroup>
-          <Label>选择模型</Label>
+          <Label>{t('chat.selectModel')}</Label>
           <Select value={modelId} onChange={(e) => handleModelChange(e.target.value)}>
-            <option value="">-- 请选择模型 --</option>
+            <option value="">-- {t('chat.selectModel')} --</option>
             {models.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -235,7 +239,7 @@ const ChatSettingsPanel: React.FC<ChatSettingsProps> = ({
         </FormGroup>
 
         <FormGroup hidden={!isCustom}>
-          <Label>API 地址</Label>
+          <Label>{t('chat.apiAddress')}</Label>
           <Input
             type="url"
             value={baseUrl}
@@ -245,17 +249,17 @@ const ChatSettingsPanel: React.FC<ChatSettingsProps> = ({
         </FormGroup>
 
         <FormGroup hidden={!isCustom}>
-          <Label>模型名称</Label>
+          <Label>{t('chat.modelName')}</Label>
           <Input
             type="text"
             value={modelName}
             onChange={(e) => setModelName(e.target.value)}
-            placeholder="如: gpt-4o"
+            placeholder="gpt-4o"
           />
         </FormGroup>
 
         <FormGroup>
-          <Label>API Key</Label>
+          <Label>{t('settings.apiKey')}</Label>
           <ApiKeyWrapper>
             <Input
               type={showKey ? 'text' : 'password'}
@@ -271,16 +275,16 @@ const ChatSettingsPanel: React.FC<ChatSettingsProps> = ({
         </FormGroup>
 
         <FormGroup>
-          <Label>对话名称（可选）</Label>
+          <Label>{t('chat.chatName')}</Label>
           <Input
             type="text"
             value={chatName}
             onChange={(e) => setChatName(e.target.value)}
-            placeholder="给对话起个名字"
+            placeholder={t('chat.chatName')}
           />
         </FormGroup>
 
-        <SaveButton onClick={handleSave}>🚀 保存并开始聊天</SaveButton>
+        <SaveButton onClick={handleSave}>🚀 {t('chat.saveAndStart')}</SaveButton>
       </Body>
     </Panel>
   );

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { createTray } from './tray';
@@ -103,10 +103,17 @@ function getModelList(): ModelInfo[] {
       requiresUrl: false,
     },
     {
-      id: 'deepseek-chat',
-      name: 'DeepSeek',
-      baseUrl: 'https://api.deepseek.com/v1',
-      model: 'deepseek-chat',
+      id: 'deepseek-v4-pro',
+      name: 'DeepSeek V4-Pro',
+      baseUrl: 'https://api.deepseek.com',
+      model: 'deepseek-v4-pro',
+      requiresUrl: false,
+    },
+    {
+      id: 'deepseek-v4-flash',
+      name: 'DeepSeek V4-Flash',
+      baseUrl: 'https://api.deepseek.com',
+      model: 'deepseek-v4-flash',
       requiresUrl: false,
     },
     {
@@ -228,6 +235,15 @@ app.whenReady().then(() => {
   registerIpcHandlers();
   mainWindow = createWindow();
   createTray(mainWindow);
+
+  // Set Dock icon on macOS
+  if (process.platform === 'darwin' && app.dock) {
+    const dockIconPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'assets', 'icon.png')
+      : path.join(__dirname, '..', 'src', 'assets', 'icon.png');
+    const dockIcon = nativeImage.createFromPath(dockIconPath);
+    app.dock.setIcon(dockIcon);
+  }
 
   app.on('activate', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {

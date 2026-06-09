@@ -4,10 +4,20 @@ export interface Todo {
   description?: string;
   completed: boolean;
   priority: Priority;
+  important: boolean;
+  dueDate?: number;
+  myDay: boolean;
+  listId?: string;
   createdAt: number;
   updatedAt: number;
 }
 
-export type Priority = 'low' | 'medium' | 'high';
+export interface TodoList {
+  id: string;
+  name: string;
+  icon: string;
+}
 
+export type Priority = 'low' | 'medium' | 'high';
 export type FilterType = 'all' | 'active' | 'completed';
+export type ViewType = 'my-day' | 'important' | 'planned' | 'tasks' | 'list';

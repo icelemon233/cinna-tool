@@ -13,8 +13,8 @@ const ItemContainer = styled.div<{ completed: boolean }>`
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: ${({ completed }) => (completed ? '#f7fafc' : '#fff')};
-  border: 1px solid #e2e8f0;
+  background: ${({ completed }) => (completed ? 'var(--bg-card-completed)' : 'var(--bg-card)')};
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   transition: box-shadow 0.2s ease, background 0.2s ease;
 
@@ -33,7 +33,7 @@ const Checkbox = styled.input`
 const Title = styled.span<{ completed: boolean }>`
   flex: 1;
   font-size: 15px;
-  color: ${({ completed }) => (completed ? '#a0aec0' : '#2d3748')};
+  color: ${({ completed }) => (completed ? 'var(--text-muted)' : 'var(--text-primary)')};
   text-decoration: ${({ completed }) => (completed ? 'line-through' : 'none')};
   transition: color 0.2s ease;
 `;
@@ -59,7 +59,7 @@ const DeleteButton = styled.button`
   transition: background 0.2s ease;
 
   &:hover {
-    background: #fff5f5;
+    background: var(--delete-btn-hover-bg);
   }
 `;
 

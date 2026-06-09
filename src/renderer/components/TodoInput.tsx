@@ -11,33 +11,41 @@ const Container = styled.div`
 const Input = styled.input`
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  background: var(--input-bg);
+  color: var(--text-primary);
 
   &:focus {
     border-color: #667eea;
   }
 
   &::placeholder {
-    color: #a0aec0;
+    color: var(--text-muted);
   }
 `;
 
 const Select = styled.select`
   padding: 12px 14px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--text-primary);
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 
   &:focus {
     border-color: #667eea;
+  }
+
+  option {
+    background: var(--bg-card);
+    color: var(--text-primary);
   }
 `;
 

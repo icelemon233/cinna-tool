@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import ReactMarkdown from 'react-markdown';
-import type { Message } from '../../store/chatStore';
+import { useTranslation } from '../../i18n';
+import { useChatStore, type Message } from '../../store/chatStore';
 
 const MessageContainer = styled.div<{ isUser: boolean }>`
   display: flex;
@@ -33,19 +34,25 @@ const Avatar = styled.div<{ isUser: boolean }>`
   font-size: 14px;
   font-weight: 700;
   flex-shrink: 0;
-  background: ${({ isUser }) => (isUser ? '#f59e0b' : '#1e1e2a')};
-  color: ${({ isUser }) => (isUser ? '#000' : '#e8e8f0')};
-  border: ${({ isUser }) => (isUser ? 'none' : '1px solid #2a2a3d')};
+  background: ${({ isUser }) => (isUser ? 'var(--accent)' : 'var(--bg-secondary)')};
+  color: ${({ isUser }) => (isUser ? '#fff' : 'var(--text-primary)')};
+  border: 1px solid var(--border-color);
+`;
+
+const BubbleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 `;
 
 const Bubble = styled.div<{ isUser: boolean }>`
-  background: ${({ isUser }) => (isUser ? '#1e2a3a' : '#1a1a26')};
-  border: 1px solid ${({ isUser }) => (isUser ? '#2d4a6a' : '#2a2a3d')};
+  background: ${({ isUser }) => (isUser ? 'var(--accent-light)' : 'var(--bg-card)')};
+  border: 1px solid ${({ isUser }) => (isUser ? 'transparent' : 'var(--border-color)')};
   border-radius: 12px;
   padding: 12px 16px;
   font-size: 14px;
   line-height: 1.7;
-  color: #e8e8f0;
+  color: var(--text-primary);
   word-break: break-word;
 
   /* Markdown styles */
@@ -57,7 +64,7 @@ const Bubble = styled.div<{ isUser: boolean }>`
   }
 
   code {
-    background: #2a2a3d;
+    background: var(--bg-secondary);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 13px;
@@ -65,8 +72,8 @@ const Bubble = styled.div<{ isUser: boolean }>`
   }
 
   pre {
-    background: #0f0f14;
-    border: 1px solid #2a2a3d;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 12px 16px;
     overflow-x: auto;
@@ -84,14 +91,14 @@ const Bubble = styled.div<{ isUser: boolean }>`
   }
 
   blockquote {
-    border-left: 3px solid #f59e0b;
+    border-left: 3px solid var(--accent);
     padding-left: 12px;
     margin: 8px 0;
-    color: #8888a8;
+    color: var(--text-secondary);
   }
 
   a {
-    color: #f59e0b;
+    color: var(--accent);
     text-decoration: none;
     &:hover {
       text-decoration: underline;
@@ -100,16 +107,48 @@ const Bubble = styled.div<{ isUser: boolean }>`
 
   h1, h2, h3, h4, h5, h6 {
     margin: 12px 0 8px 0;
-    color: #e8e8f0;
+    color: var(--text-primary);
   }
 `;
 
-const Timestamp = styled.span`
+const Timestamp = styled.span<{ isUser: boolean }>`
   font-size: 11px;
-  color: #55556a;
+  color: var(--text-muted);
+  margin-top: 2px;
+  text-align: ${({ isUser }) => (isUser ? 'right' : 'left')};
+`;
+
+const ActionBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin-top: 4px;
-  display: block;
-  text-align: ${(props: { isUser: boolean }) => (props.isUser ? 'right' : 'left')};
+`;
+
+const ActionButton = styled.button<{ active?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: ${({ active }) => (active ? 'var(--accent)' : 'var(--text-muted)')};
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+`;
+
+const ActionDivider = styled.span`
+  width: 1px;
+  height: 14px;
+  background: var(--border-color);
+  margin: 0 2px;
 `;
 
 const TypingIndicator = styled.div`
@@ -122,7 +161,7 @@ const TypingIndicator = styled.div`
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #55556a;
+    background: var(--text-muted);
     animation: bounce 1.2s infinite;
 
     &:nth-of-type(2) {
@@ -145,6 +184,13 @@ const TypingIndicator = styled.div`
   }
 `;
 
+const CopiedToast = styled.span`
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-left: 4px;
+`;
+
 interface ChatMessageProps {
   message: Message;
   isGenerating?: boolean;
@@ -158,11 +204,27 @@ function formatTime(ts: number): string {
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, isGenerating }) => {
   const isUser = message.role === 'user';
   const showTyping = !isUser && isGenerating && !message.content;
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: do nothing
+    }
+  };
+
+  const handleRegenerate = () => {
+    useChatStore.getState().regenerateLastMessage();
+  };
 
   return (
-    <div>
-      <MessageContainer isUser={isUser}>
-        <Avatar isUser={isUser}>{isUser ? 'U' : 'C'}</Avatar>
+    <MessageContainer isUser={isUser}>
+      <Avatar isUser={isUser}>{isUser ? 'U' : 'AI'}</Avatar>
+      <BubbleWrapper>
         <Bubble isUser={isUser}>
           {showTyping ? (
             <TypingIndicator>
@@ -176,9 +238,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isGenerating }) => {
             <ReactMarkdown>{message.content}</ReactMarkdown>
           )}
         </Bubble>
-      </MessageContainer>
-      <Timestamp isUser={isUser}>{formatTime(message.timestamp)}</Timestamp>
-    </div>
+        <Timestamp isUser={isUser}>{formatTime(message.timestamp)}</Timestamp>
+        {!isUser && message.content && !isGenerating && (
+          <ActionBar>
+            <ActionButton onClick={handleCopy}>
+              📋 {t('chat.copy')}
+              {copied && <CopiedToast>✓</CopiedToast>}
+            </ActionButton>
+            <ActionDivider />
+            <ActionButton onClick={handleRegenerate}>
+              🔄 {t('chat.regenerate')}
+            </ActionButton>
+            <ActionDivider />
+            <ActionButton>
+              👍
+            </ActionButton>
+            <ActionButton>
+              👎
+            </ActionButton>
+          </ActionBar>
+        )}
+      </BubbleWrapper>
+    </MessageContainer>
   );
 };
 

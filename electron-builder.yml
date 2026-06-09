@@ -6,24 +6,33 @@ files:
   - dist/**/*
   - dist-renderer/**/*
   - package.json
+extraResources:
+  - from: "src/assets/icon.png"
+    to: "assets/icon.png"
+  - from: "src/assets/logo_black.png"
+    to: "assets/logo_black.png"
+  - from: "src/assets/logo_white.png"
+    to: "assets/logo_white.png"
+  - from: "src/assets/logo_origin.png"
+    to: "assets/logo_origin.png"
 mac:
   category: public.app-category.developer-tools
   target:
     - dmg
     - zip
-  icon: assets/icon.icns
+  icon: src/assets/icon.png
 win:
   target:
     - target: nsis
       arch:
         - x64
     - zip
-  icon: assets/icon.ico
+  icon: src/assets/icon.png
 linux:
   target:
     - AppImage
     - deb
-  icon: assets/icon.png
+  icon: src/assets/icon.png
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true

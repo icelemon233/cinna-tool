@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { useChatStore } from '../../store/chatStore';
+import { useTranslation } from '../../i18n';
+import { queryBalance, type BalanceResponse } from '../../services/aiService';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import ChatSettingsPanel from './ChatSettings';
@@ -8,106 +10,187 @@ import ChatSettingsPanel from './ChatSettings';
 const PageContainer = styled.div`
   display: flex;
   height: 100%;
-  background: #0f0f14;
-  color: #e8e8f0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   position: relative;
 `;
 
 const Sidebar = styled.aside`
-  width: 220px;
-  background: #17171f;
-  border-right: 1px solid #2a2a3d;
+  width: 280px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 `;
 
 const SidebarHeader = styled.div`
-  padding: 20px 16px 16px;
-  border-bottom: 1px solid #2a2a3d;
-`;
-
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const LogoIcon = styled.span`
-  font-size: 24px;
-`;
-
-const LogoText = styled.span`
-  font-size: 16px;
-  font-weight: 700;
-  color: #e8e8f0;
-  letter-spacing: 0.5px;
-`;
-
-const SidebarActions = styled.div`
-  padding: 12px;
+  padding: 20px 16px 12px;
 `;
 
 const NewChatButton = styled.button`
   width: 100%;
-  padding: 10px 16px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  border-radius: 8px;
-  color: #f59e0b;
-  font-size: 13px;
+  padding: 12px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
 
   &:hover {
-    background: rgba(245, 158, 11, 0.2);
-    border-color: #f59e0b;
+    opacity: 0.9;
+    transform: translateY(-1px);
   }
 `;
 
-const ModelSection = styled.div`
-  padding: 12px 16px;
-  border-top: 1px solid #2a2a3d;
-  margin-top: auto;
+const SidebarSection = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+  }
 `;
 
-const ModelLabel = styled.div`
-  font-size: 11px;
+const SectionTitle = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #55556a;
-  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  padding: 8px 8px 6px;
 `;
 
-const ModelName = styled.div`
+const ChatHistoryItem = styled.button<{ active?: boolean }>`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: ${({ active }) => (active ? 'var(--accent-light)' : 'transparent')};
+  color: ${({ active }) => (active ? 'var(--accent)' : 'var(--text-primary)')};
   font-size: 13px;
-  color: #8888a8;
-  font-weight: 500;
+  font-weight: ${({ active }) => (active ? 500 : 400)};
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  position: relative;
+
+  &:hover {
+    background: var(--accent-light);
+  }
+
+  &:hover .delete-btn {
+    opacity: 1;
+  }
+`;
+
+const ChatItemIcon = styled.span`
+  font-size: 16px;
+  flex-shrink: 0;
+`;
+
+const ChatItemTitle = styled.span`
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const DeleteChatBtn = styled.button`
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  padding: 4px;
+  line-height: 1;
+
+  &:hover {
+    color: #e53e3e;
+  }
 `;
 
 const SidebarFooter = styled.div`
   padding: 12px;
-  border-top: 1px solid #2a2a3d;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const BalanceRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+`;
+
+const BalanceText = styled.span`
+  font-weight: 500;
+`;
+
+const RefreshBalanceBtn = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+
+  &:hover {
+    color: var(--accent);
+    background: var(--accent-light);
+  }
 `;
 
 const SettingsButton = styled.button`
   width: 100%;
-  padding: 8px 16px;
+  padding: 10px 16px;
   background: transparent;
-  border: 1px solid #2a2a3d;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #8888a8;
+  color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 
   &:hover {
-    background: #252536;
-    color: #e8e8f0;
+    background: var(--accent-light);
+    color: var(--text-primary);
+    border-color: var(--accent);
   }
 `;
 
@@ -122,10 +205,10 @@ const MainArea = styled.main`
 const MessagesContainer = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -136,7 +219,7 @@ const MessagesContainer = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #2a2a3d;
+    background: var(--border-color);
     border-radius: 3px;
   }
 `;
@@ -147,100 +230,149 @@ const WelcomePage = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   padding: 40px;
   text-align: center;
 `;
 
-const WelcomeIcon = styled.div`
-  font-size: 56px;
-  margin-bottom: 8px;
-`;
-
 const WelcomeTitle = styled.h1`
-  font-size: 22px;
+  font-size: 32px;
   font-weight: 700;
-  color: #e8e8f0;
+  color: var(--text-primary);
   margin: 0;
 `;
 
-const WelcomeText = styled.p`
-  font-size: 14px;
-  color: #8888a8;
+const WelcomeSubtitle = styled.p`
+  font-size: 15px;
+  color: var(--text-muted);
   margin: 0;
+  max-width: 400px;
 `;
 
 const WelcomeButton = styled.button`
-  padding: 10px 28px;
-  background: #f59e0b;
+  padding: 12px 32px;
+  background: var(--accent);
   border: none;
-  border-radius: 8px;
-  color: #000;
+  border-radius: 10px;
+  color: #fff;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 8px;
 
   &:hover {
-    background: #fbbf24;
+    opacity: 0.9;
+    transform: translateY(-1px);
   }
 `;
 
 const ChatPage: React.FC = () => {
   const {
-    messages,
+    conversations,
+    activeConversationId,
     isGenerating,
     settings,
     models,
     settingsOpen,
+    newConversation,
+    switchConversation,
+    deleteConversation,
     sendMessage,
     stopGeneration,
-    clearHistory,
     updateSettings,
     loadSettings,
     loadModels,
     setSettingsOpen,
   } = useChatStore();
 
+  const { t } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [balance, setBalance] = useState<string | null>(null);
 
   useEffect(() => {
     loadModels();
     loadSettings();
   }, [loadModels, loadSettings]);
 
+  // Query balance when settings are available
+  useEffect(() => {
+    if (settings.apiKey && settings.baseUrl) {
+      fetchBalance();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.apiKey, settings.baseUrl]);
+
+  const fetchBalance = async () => {
+    if (!settings.apiKey || !settings.baseUrl) return;
+    try {
+      const res: BalanceResponse = await queryBalance(settings.baseUrl, settings.apiKey);
+      if (res.balance_infos && res.balance_infos.length > 0) {
+        const info = res.balance_infos[0];
+        const symbol = info.currency === 'CNY' ? '¥' : '$';
+        setBalance(`${symbol}${parseFloat(info.total_balance).toFixed(2)}`);
+      }
+    } catch {
+      // Silent fail
+      setBalance(null);
+    }
+  };
+
+  const activeConv = conversations.find((c) => c.id === activeConversationId);
+  const currentMessages = activeConv?.messages || [];
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [currentMessages]);
 
   const isConfigured = settings.apiKey && settings.model && settings.baseUrl;
   const currentModelName =
-    models.find((m) => m.id === settings.modelId)?.name || settings.model || '未选择';
+    models.find((m) => m.id === settings.modelId)?.name || settings.model || t('chat.notSelected');
+
+  const totalChars = currentMessages.reduce((acc, m) => acc + m.content.length, 0);
 
   return (
     <PageContainer>
       <Sidebar>
         <SidebarHeader>
-          <Logo>
-            <LogoIcon>🧡</LogoIcon>
-            <LogoText>AI Chat</LogoText>
-          </Logo>
+          <NewChatButton onClick={newConversation}>
+            <span>✨</span> {t('chat.newChat')}
+          </NewChatButton>
         </SidebarHeader>
 
-        <SidebarActions>
-          <NewChatButton onClick={clearHistory}>
-            <span>✨</span> 新建对话
-          </NewChatButton>
-        </SidebarActions>
-
-        <ModelSection>
-          <ModelLabel>当前模型</ModelLabel>
-          <ModelName>{currentModelName}</ModelName>
-        </ModelSection>
+        <SidebarSection>
+          <SectionTitle>{t('chat.recentChats')}</SectionTitle>
+          {conversations.map((conv) => (
+            <ChatHistoryItem
+              key={conv.id}
+              active={conv.id === activeConversationId}
+              onClick={() => switchConversation(conv.id)}
+            >
+              <ChatItemIcon>💬</ChatItemIcon>
+              <ChatItemTitle>{conv.title}</ChatItemTitle>
+              <DeleteChatBtn
+                className="delete-btn"
+                onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
+                title={t('chat.deleteChat')}
+              >
+                ✕
+              </DeleteChatBtn>
+            </ChatHistoryItem>
+          ))}
+        </SidebarSection>
 
         <SidebarFooter>
-          <SettingsButton onClick={() => setSettingsOpen(true)}>⚙️ 设置</SettingsButton>
+          {balance && (
+            <BalanceRow>
+              <BalanceText>💰 {balance}</BalanceText>
+              <RefreshBalanceBtn onClick={fetchBalance} title="刷新余额">
+                🔄
+              </RefreshBalanceBtn>
+            </BalanceRow>
+          )}
+          <SettingsButton onClick={() => setSettingsOpen(true)}>
+            ⚙️ {t('chat.settings')}
+          </SettingsButton>
         </SidebarFooter>
       </Sidebar>
 
@@ -253,23 +385,36 @@ const ChatPage: React.FC = () => {
           onSave={updateSettings}
         />
 
-        {!isConfigured && messages.length === 0 ? (
+        {!isConfigured && currentMessages.length === 0 ? (
           <WelcomePage>
-            <WelcomeIcon>🧡</WelcomeIcon>
-            <WelcomeTitle>欢迎使用 AI Chat</WelcomeTitle>
-            <WelcomeText>选择模型并输入 API Key 开始对话</WelcomeText>
+            <WelcomeTitle>{t('chat.whatHelp')}</WelcomeTitle>
+            <WelcomeSubtitle>{t('chat.welcomeDesc')}</WelcomeSubtitle>
             <WelcomeButton onClick={() => setSettingsOpen(true)}>
-              ⚙️ 前往设置
+              ⚙️ {t('chat.goSettings')}
             </WelcomeButton>
+          </WelcomePage>
+        ) : currentMessages.length === 0 ? (
+          <WelcomePage>
+            <WelcomeTitle>{t('chat.whatHelp')}</WelcomeTitle>
+            <WelcomeSubtitle>{t('chat.sendHint')}</WelcomeSubtitle>
+            <ChatInput
+              onSend={sendMessage}
+              onStop={stopGeneration}
+              isGenerating={isGenerating}
+              disabled={!isConfigured}
+              currentModelName={currentModelName}
+              onModelClick={() => setSettingsOpen(true)}
+              tokenCount={totalChars}
+            />
           </WelcomePage>
         ) : (
           <>
             <MessagesContainer>
-              {messages.map((msg, idx) => (
+              {currentMessages.map((msg, idx) => (
                 <ChatMessage
                   key={msg.id}
                   message={msg}
-                  isGenerating={isGenerating && idx === messages.length - 1}
+                  isGenerating={isGenerating && idx === currentMessages.length - 1}
                 />
               ))}
               <div ref={messagesEndRef} />
@@ -279,6 +424,9 @@ const ChatPage: React.FC = () => {
               onStop={stopGeneration}
               isGenerating={isGenerating}
               disabled={!isConfigured}
+              currentModelName={currentModelName}
+              onModelClick={() => setSettingsOpen(true)}
+              tokenCount={totalChars}
             />
           </>
         )}

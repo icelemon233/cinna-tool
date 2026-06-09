@@ -4,18 +4,24 @@
   "description": "CinnaTool - AI Chat & Todo Desktop Application",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"node scripts/wait-and-launch.js\"",
+    "dev": "node scripts/dev.js",
     "dev:renderer": "vite",
     "dev:electron": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron dist/main.js",
     "build": "tsc -p tsconfig.electron.json && vite build",
-    "start": "electron dist/main.js",
+    "start": "tsc -p tsconfig.electron.json && vite build && electron dist/main.js",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "build:win": "electron-builder --win --x64",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux"
   },
-  "keywords": ["electron", "react", "typescript", "ai-chat", "todo"],
+  "keywords": [
+    "electron",
+    "react",
+    "typescript",
+    "ai-chat",
+    "todo"
+  ],
   "author": "Cinna",
   "license": "MIT",
   "dependencies": {
@@ -26,16 +32,16 @@
     "electron-store": "^11.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
     "typescript": "^5.8.3",
     "uuid": "^14.0.0",
     "vite": "^6.3.5",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@types/react": "^19.2.16",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/uuid": "^10.0.0",
-    "concurrently": "^9.1.2",
     "electron-builder": "^25.1.8"
   }
 }
