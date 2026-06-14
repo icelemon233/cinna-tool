@@ -13,5 +13,5 @@
     "declaration": false,
     "sourceMap": true
   },
-  "include": ["src/main.ts", "src/preload.ts", "src/tray.ts"]
+  "include": ["src/main.ts", "src/preload.ts"]
 }

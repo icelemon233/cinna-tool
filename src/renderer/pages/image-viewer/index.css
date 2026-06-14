@@ -1,0 +1,228 @@
+@layer components {
+  .image-viewer-page {
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    min-width: 800px;
+    overflow: hidden;
+    background: var(--shell-main-bg);
+    color: var(--text-primary);
+  }
+
+  .image-viewer-page.is-active {
+    display: flex;
+    animation: pageIn 0.2s ease;
+  }
+
+  .image-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px 16px;
+    flex-shrink: 0;
+  }
+
+  .image-viewer-title-wrap {
+    min-width: 0;
+  }
+
+  .image-viewer-title-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .image-viewer-title-line > .anticon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .image-viewer-title {
+    margin: 0 !important;
+  }
+
+  .image-viewer-path {
+    margin: 4px 0 0;
+    overflow: hidden;
+    color: var(--text-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .image-viewer-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 28px 28px;
+  }
+
+  .image-viewer-layout {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .image-viewer-thumb-panel,
+  .image-viewer-preview-panel {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+  }
+
+  .image-viewer-thumb-header,
+  .image-viewer-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .image-viewer-thumb-header {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .image-viewer-thumb-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    align-content: start;
+    gap: 8px;
+    overflow: auto;
+    padding: 10px;
+  }
+
+  .image-viewer-thumb-button {
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  .image-viewer-thumb-button.is-active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+  }
+
+  .image-viewer-thumb-button:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .image-viewer-thumb-button img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .image-viewer-preview-meta {
+    min-width: 0;
+  }
+
+  .image-viewer-preview-name,
+  .image-viewer-ellipsis {
+    min-width: 0;
+    max-width: 100%;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .image-viewer-preview-size {
+    font-size: 12px;
+  }
+
+  .image-viewer-stage {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 16px;
+    background:
+      linear-gradient(45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%);
+    background-size: 18px 18px;
+    background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+  }
+
+  .image-viewer-stage img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    animation: imageViewerIn 0.2s ease;
+  }
+
+  .image-viewer-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+  }
+
+  @keyframes imageViewerIn {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @media (max-width: 799px) {
+    .image-viewer-page {
+      min-width: 560px;
+      overflow: auto;
+    }
+
+    .image-viewer-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+
+    .image-viewer-thumb-grid {
+      max-height: 168px;
+    }
+
+    .image-viewer-header {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 18px 18px 12px;
+    }
+
+    .image-viewer-body {
+      padding: 0 18px 18px;
+    }
+  }
+}

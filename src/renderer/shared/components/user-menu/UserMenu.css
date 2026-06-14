@@ -1,0 +1,98 @@
+@layer components {
+  .user-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+  }
+
+  .user-menu-panel {
+    position: fixed;
+    top: 108px;
+    right: 28px;
+    width: min(300px, calc(100vw - 56px));
+    max-height: min(440px, calc(100vh - 132px));
+    overflow: auto;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+    z-index: 1000;
+    animation: userMenuIn 0.15s ease;
+  }
+
+  .user-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .user-menu-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-menu-line {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-menu-line--small {
+    font-size: 12px;
+  }
+
+  .user-menu-button {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .user-menu-stack {
+    width: 100%;
+  }
+
+  .user-menu-title {
+    margin: 0 !important;
+  }
+
+  .user-menu-title--center {
+    text-align: center;
+  }
+
+  .user-menu-avatar {
+    background: var(--accent);
+  }
+
+  .user-menu-avatar .ant-avatar-img {
+    object-fit: cover;
+  }
+
+  .user-menu-divider {
+    margin: 14px 0 8px;
+  }
+
+  .user-menu-divider--compact {
+    margin: 8px 0;
+  }
+
+  @keyframes userMenuIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 799px) {
+    .user-menu-panel {
+      top: 76px;
+      right: 14px;
+      max-height: calc(100vh - 98px);
+    }
+  }
+}

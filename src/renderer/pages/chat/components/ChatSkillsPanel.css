@@ -1,0 +1,113 @@
+@layer components {
+  .chat-skills-summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+  }
+
+  .chat-skills-drawer .ant-drawer-body {
+    padding: 20px;
+  }
+
+  .chat-skills-active-tags {
+    margin-bottom: 16px;
+  }
+
+  .chat-skills-form {
+    overflow: hidden;
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+    animation: chatSkillsPanelIn 0.18s ease;
+  }
+
+  .chat-skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chat-skill-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+    transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  .chat-skill-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    transform: translateY(-1px);
+  }
+
+  .chat-skill-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .chat-skill-actions {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .chat-skill-title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chat-skill-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chat-skill-description {
+    display: -webkit-box;
+    margin: 8px 0 0 !important;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .chat-skill-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  @keyframes chatSkillsPanelIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .chat-skill-item {
+      flex-direction: column;
+    }
+  }
+}

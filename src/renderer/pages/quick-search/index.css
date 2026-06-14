@@ -1,0 +1,294 @@
+@layer components {
+  .quick-search-page {
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    min-width: 800px;
+    overflow: hidden;
+    background: var(--shell-main-bg);
+    color: var(--text-primary);
+  }
+
+  .quick-search-page.is-active {
+    display: flex;
+    animation: pageIn 0.2s ease;
+  }
+
+  .quick-search-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px 14px;
+    flex-shrink: 0;
+  }
+
+  .quick-search-title-wrap {
+    min-width: 0;
+  }
+
+  .quick-search-title-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quick-search-title-line > .anticon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .quick-search-title {
+    margin: 0 !important;
+  }
+
+  .quick-search-subtitle {
+    margin: 4px 0 0 !important;
+  }
+
+  .quick-search-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    width: min(980px, 100%);
+  }
+
+  .quick-search-controls .ant-input-affix-wrapper {
+    flex: 1 1 460px;
+    min-width: 280px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .quick-search-controls .ant-btn {
+    flex: 0 0 auto;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .quick-search-case-checkbox {
+    flex: 0 0 auto;
+    width: auto !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    align-self: center;
+    margin: 0 !important;
+    padding: 0 2px !important;
+    color: var(--text-secondary);
+    line-height: 16px;
+    white-space: nowrap;
+  }
+
+  .quick-search-case-checkbox .ant-checkbox {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    top: 0 !important;
+    width: 16px;
+    height: 16px;
+    line-height: 1;
+  }
+
+  .quick-search-case-checkbox .ant-checkbox-label {
+    height: 16px;
+    display: inline-flex !important;
+    align-items: center;
+    padding-inline-start: 6px !important;
+    padding-inline-end: 0 !important;
+    line-height: 16px !important;
+  }
+
+  .quick-search-case-checkbox.ant-checkbox-wrapper-disabled {
+    color: var(--text-muted) !important;
+  }
+
+  .quick-search-file-input {
+    display: none;
+  }
+
+  .quick-search-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 28px 28px;
+  }
+
+  .quick-search-shell {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+  }
+
+  .quick-search-drop-zone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bg-card) 86%, var(--bg-secondary));
+    transition: background 0.16s ease, border-color 0.16s ease;
+  }
+
+  .quick-search-drop-zone.is-dragging {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+
+  .quick-search-file-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .quick-search-file-name {
+    min-width: 0;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quick-search-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .quick-search-results {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+  }
+
+  .quick-search-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .quick-search-progress-wrap {
+    min-width: 220px;
+    width: min(320px, 100%);
+  }
+
+  .quick-search-scroller {
+    position: relative;
+    min-height: 0;
+    overflow: auto;
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    background: color-mix(in srgb, var(--bg-card) 92%, var(--bg-secondary));
+  }
+
+  .quick-search-sizer {
+    position: relative;
+    min-width: 100%;
+  }
+
+  .quick-search-rows {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .quick-search-result-row {
+    height: 44px;
+    display: grid;
+    grid-template-columns: 64px max-content;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 0 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+    white-space: nowrap;
+  }
+
+  .quick-search-line-number {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: right;
+    user-select: none;
+  }
+
+  .quick-search-line-text {
+    min-width: max-content;
+    overflow: visible;
+    color: var(--text-primary);
+    font-size: 13px;
+    text-overflow: clip;
+  }
+
+  .quick-search-line-text mark {
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: #ffea00;
+    color: #211600;
+    box-shadow: inset 0 -2px 0 #ff8a00;
+    font-weight: 800;
+  }
+
+  .quick-search-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  @media (max-width: 799px) {
+    .quick-search-page {
+      min-width: 560px;
+      overflow: auto;
+    }
+
+    .quick-search-controls {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .quick-search-controls .ant-input-affix-wrapper {
+      flex-basis: 100%;
+      min-width: 0;
+    }
+
+    .quick-search-header {
+      align-items: stretch;
+      flex-direction: column;
+      padding: 18px 18px 12px;
+    }
+
+    .quick-search-drop-zone,
+    .quick-search-status {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .quick-search-body {
+      padding: 0 18px 18px;
+    }
+  }
+}

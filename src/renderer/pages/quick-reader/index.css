@@ -1,0 +1,289 @@
+@layer components {
+  .quick-reader-page {
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    min-width: 800px;
+    overflow: hidden;
+    background: var(--shell-main-bg);
+    color: var(--text-primary);
+  }
+
+  .quick-reader-page.is-active {
+    display: flex;
+    animation: pageIn 0.2s ease;
+  }
+
+  .quick-reader-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px 16px;
+    flex-shrink: 0;
+  }
+
+  .quick-reader-title-wrap {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .quick-reader-title-wrap > .anticon:first-child {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .quick-reader-title {
+    margin: 0 !important;
+  }
+
+  .quick-reader-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 28px 28px;
+  }
+
+  .quick-reader-surface {
+    height: 100%;
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-card);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .quick-reader-surface:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+  }
+
+  .quick-reader-code-block,
+  .quick-reader-text-block {
+    min-height: 100%;
+    margin: 0;
+    padding: 18px;
+    overflow: auto;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre;
+  }
+
+  .quick-reader-text-block {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .quick-reader-code-frame {
+    min-width: max-content;
+    min-height: 100%;
+    background: #101214;
+    color: #e8edf2;
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+
+  .quick-reader-code-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 100%;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(16, 18, 20, 0.94);
+    backdrop-filter: blur(12px);
+  }
+
+  .quick-reader-code-language {
+    padding: 3px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: #8bd5ff;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .quick-reader-code-body {
+    padding: 10px 0 16px;
+  }
+
+  .quick-reader-code-line {
+    display: grid;
+    grid-template-columns: 56px minmax(max-content, 1fr);
+    min-height: 22px;
+    line-height: 22px;
+    font-size: 13px;
+  }
+
+  .quick-reader-line-number {
+    padding: 0 14px 0 8px;
+    color: #66717d;
+    text-align: right;
+    user-select: none;
+  }
+
+  .quick-reader-line-code {
+    padding-right: 18px;
+    white-space: pre;
+  }
+
+  .quick-reader-line-code .token-keyword {
+    color: #ff7ab2;
+    font-weight: 650;
+  }
+
+  .quick-reader-line-code .token-string {
+    color: #c3e88d;
+  }
+
+  .quick-reader-line-code .token-number {
+    color: #f7c67f;
+  }
+
+  .quick-reader-line-code .token-comment {
+    color: #7d8792;
+    font-style: italic;
+  }
+
+  .quick-reader-line-code .token-boolean,
+  .quick-reader-line-code .token-null {
+    color: #82aaff;
+  }
+
+  .quick-reader-line-code .token-punctuation {
+    color: #89ddff;
+  }
+
+  .quick-reader-markdown {
+    padding: 24px;
+    color: var(--text-primary);
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .quick-reader-markdown h1,
+  .quick-reader-markdown h2,
+  .quick-reader-markdown h3 {
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+    color: var(--text-primary);
+  }
+
+  .quick-reader-markdown h1:first-of-type,
+  .quick-reader-markdown h2:first-of-type,
+  .quick-reader-markdown h3:first-of-type {
+    margin-top: 0;
+  }
+
+  .quick-reader-markdown p,
+  .quick-reader-markdown ul,
+  .quick-reader-markdown ol,
+  .quick-reader-markdown blockquote,
+  .quick-reader-markdown table,
+  .quick-reader-markdown pre {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+
+  .quick-reader-markdown pre {
+    padding: 12px;
+    overflow: auto;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+  }
+
+  .quick-reader-markdown code {
+    font-size: 0.92em;
+  }
+
+  .quick-reader-markdown table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow: auto;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .quick-reader-markdown thead {
+    background: color-mix(in srgb, var(--bg-secondary) 72%, var(--bg-card));
+  }
+
+  .quick-reader-markdown th,
+  .quick-reader-markdown td {
+    min-width: 120px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
+    white-space: normal;
+  }
+
+  .quick-reader-markdown th {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .quick-reader-markdown tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--bg-card) 72%, transparent);
+  }
+
+  .quick-reader-markdown img {
+    max-width: 100%;
+  }
+
+  .quick-reader-paste-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+  }
+
+  .quick-reader-paste-panel .ant-input {
+    flex: 1;
+    min-height: 360px;
+    color: var(--text-primary);
+    background: var(--bg-card);
+  }
+
+  .quick-reader-paste-panel .ant-input::placeholder {
+    color: color-mix(in srgb, var(--text-secondary) 72%, transparent);
+  }
+
+  @media (max-width: 799px) {
+    .quick-reader-page {
+      min-width: 560px;
+      overflow: auto;
+    }
+
+    .quick-reader-header {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 18px 18px 12px;
+    }
+
+    .quick-reader-body {
+      padding: 0 18px 18px;
+    }
+
+    .quick-reader-paste-panel .ant-input {
+      min-height: 260px;
+    }
+  }
+}

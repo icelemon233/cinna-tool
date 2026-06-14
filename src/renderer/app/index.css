@@ -1,0 +1,345 @@
+@reference "tailwindcss";
+
+@layer components {
+  .app-shell {
+    @apply relative isolate flex h-screen flex-row overflow-hidden bg-[var(--shell-sidebar-bg)] text-[var(--text-primary)] transition-colors duration-200;
+  }
+
+  .app-shell > * {
+    @apply relative z-[1];
+  }
+
+  .app-sidebar {
+    @apply flex w-[236px] shrink-0 flex-col overflow-hidden bg-[var(--shell-sidebar-bg)] px-2 pb-3.5 pt-[72px] transition-[width] duration-200 [scrollbar-width:none];
+    -webkit-app-region: drag;
+  }
+
+  .app-sidebar::-webkit-scrollbar,
+  .app-sidebar .ant-menu::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .app-sidebar .app-nav-menu,
+  .app-sidebar .ant-menu {
+    @apply overflow-hidden border-0 text-[var(--shell-sidebar-text)] shadow-none [scrollbar-width:none];
+    width: 100%;
+    padding: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    border-inline-end: 0 !important;
+    -webkit-app-region: no-drag;
+  }
+
+  .app-sidebar .ant-menu-root,
+  .app-sidebar .ant-menu-light,
+  .app-sidebar .ant-menu-inline {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  .app-sidebar .ant-menu::before,
+  .app-sidebar .ant-menu::after {
+    display: none !important;
+  }
+
+  .app-sidebar .ant-menu-item {
+    @apply mx-0 w-full rounded-lg text-[var(--shell-sidebar-text)] transition-[background,color,transform] duration-150;
+    margin-block: 4px !important;
+    background: transparent;
+    border-radius: 8px !important;
+    font-weight: 520;
+  }
+
+  .app-sidebar .ant-menu-item::after {
+    display: none !important;
+  }
+
+  .app-sidebar .ant-menu-item:hover {
+    background: var(--shell-sidebar-active-bg) !important;
+    color: var(--shell-sidebar-text) !important;
+    transform: translateX(2px);
+  }
+
+  .app-sidebar .ant-menu-item-selected,
+  .app-sidebar .ant-menu-item-active {
+    background: var(--shell-sidebar-active-bg) !important;
+    color: var(--shell-sidebar-text) !important;
+  }
+
+  .app-sidebar .ant-menu-item-icon {
+    @apply text-[17px] text-inherit;
+  }
+
+  .app-sidebar .ant-menu-title-content {
+    display: inline-block;
+  }
+
+  .app-sidebar-bottom {
+    @apply mt-auto pt-2.5;
+    -webkit-app-region: no-drag;
+  }
+
+  .app-sidebar-action {
+    @apply flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg border-0 bg-transparent px-6 text-[var(--shell-sidebar-text)] transition-[background,color,transform] duration-150;
+    border-radius: 8px !important;
+    font: inherit;
+    font-weight: 520;
+  }
+
+  .app-sidebar-action:hover,
+  .app-sidebar-action.is-active {
+    @apply bg-[var(--shell-sidebar-active-bg)];
+  }
+
+  .app-sidebar-action:hover {
+    transform: translateX(2px);
+  }
+
+  .app-sidebar-action .anticon {
+    @apply text-[17px];
+  }
+
+  .sidebar-action-label {
+    display: inline-block;
+  }
+
+  .app-main-panel {
+    @apply relative isolate flex min-w-0 flex-1 flex-col overflow-hidden rounded-l-[18px] border-l border-[var(--shell-border)] backdrop-blur-[18px];
+    background: var(--shell-main-bg);
+  }
+
+  .app-wallpaper-layer {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: var(--wallpaper-opacity, 0.74);
+  }
+
+  .app-wallpaper-layer--image {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .app-wallpaper-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .app-main-panel > .topbar,
+  .app-main-panel > .app-content-area {
+    position: relative;
+  }
+
+  .app-main-panel > .topbar {
+    z-index: 20;
+  }
+
+  .app-main-panel > .app-content-area {
+    z-index: 1;
+  }
+
+  .app-shell[data-has-wallpaper='true'] .quick-reader-page,
+  .app-shell[data-has-wallpaper='true'] .quick-search-page,
+  .app-shell[data-has-wallpaper='true'] .image-viewer-page,
+  .app-shell[data-has-wallpaper='true'] .chat-page,
+  .app-shell[data-has-wallpaper='true'] .schedule-page,
+  .app-shell[data-has-wallpaper='true'] .todo-content,
+  .app-shell[data-has-wallpaper='true'] .todo-page-content,
+  .app-shell[data-has-dynamic-wallpaper='true'] .quick-reader-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .quick-search-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .image-viewer-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .chat-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .schedule-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .todo-content,
+  .app-shell[data-has-dynamic-wallpaper='true'] .todo-page-content {
+    background: transparent;
+  }
+
+  .app-content-area {
+    @apply flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent;
+  }
+
+  .app-page-wrapper {
+    @apply min-h-0 flex-1 overflow-hidden;
+  }
+
+  .app-page-slot {
+    @apply hidden h-full;
+  }
+
+  .app-page-slot.is-active {
+    @apply block;
+    animation: pageIn 0.2s ease;
+  }
+
+  .app-page-loading {
+    @apply flex h-full min-h-0 items-center justify-center;
+  }
+
+  @media (min-width: 800px) {
+    .app-shell {
+      flex-direction: row !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .app-sidebar {
+      width: 236px !important;
+      min-width: 236px;
+      height: auto !important;
+      padding: 72px 8px 14px !important;
+      border-top: 0 !important;
+    }
+
+    .app-sidebar .app-nav-menu,
+    .app-sidebar .ant-menu {
+      display: block !important;
+      height: auto !important;
+      overflow: hidden !important;
+    }
+
+    .app-sidebar .ant-menu-item {
+      width: calc(100% - 10px) !important;
+      min-width: 0;
+      height: 40px;
+      display: flex !important;
+      justify-content: flex-start !important;
+      margin-inline: 0 10px !important;
+      padding-inline: 24px !important;
+    }
+
+    .app-sidebar .ant-menu-item-icon {
+      margin-inline-end: 10px !important;
+    }
+
+    .app-sidebar .ant-menu-title-content,
+    .sidebar-action-label {
+      display: inline-block !important;
+    }
+
+    .app-sidebar-action {
+      width: calc(100% - 10px) !important;
+      justify-content: flex-start !important;
+      padding-inline: 24px !important;
+    }
+
+    .app-main-panel {
+      min-width: 800px;
+    }
+
+    .app-page-wrapper {
+      min-width: 800px;
+    }
+  }
+
+  @media (max-width: 799px) {
+    .app-shell {
+      flex-direction: column-reverse !important;
+      overflow: hidden;
+    }
+
+    .app-main-panel {
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+      border-left: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .app-content-area,
+    .app-page-wrapper {
+      overflow: auto;
+    }
+
+    .app-sidebar {
+      width: 100% !important;
+      min-width: 0;
+      height: 66px !important;
+      min-height: 66px;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      border-top: 1px solid var(--shell-border);
+    }
+
+    .app-sidebar .app-nav-menu,
+    .app-sidebar .ant-menu {
+      width: max-content !important;
+      min-width: 0;
+      height: 100% !important;
+      display: flex !important;
+      flex: 1 1 auto;
+      align-items: center;
+      justify-content: flex-start !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+    }
+
+    .app-sidebar .ant-menu-item {
+      width: 82px !important;
+      min-width: 82px;
+      height: 52px !important;
+      display: inline-flex !important;
+      flex: 0 0 82px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center !important;
+      gap: 3px;
+      margin: 0 2px !important;
+      padding: 5px 4px !important;
+      line-height: 1.1;
+    }
+
+    .app-sidebar .ant-menu-item:hover {
+      transform: translateY(-1px);
+    }
+
+    .app-sidebar .ant-menu-item-icon {
+      margin-inline-end: 0 !important;
+      font-size: 18px;
+    }
+
+    .app-sidebar .ant-menu-title-content {
+      display: block !important;
+      margin-inline-start: 0 !important;
+      font-size: 11px;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .app-sidebar-bottom {
+      margin-top: 0;
+      padding: 0 0 0 4px;
+      flex: 0 0 auto;
+    }
+
+    .app-sidebar-action {
+      width: 62px !important;
+      height: 52px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
+      padding: 5px 4px !important;
+      line-height: 1.1;
+    }
+
+    .app-sidebar-action .anticon {
+      font-size: 18px;
+    }
+
+    .sidebar-action-label {
+      display: block !important;
+      font-size: 11px;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+  }
+}

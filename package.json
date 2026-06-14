@@ -4,16 +4,20 @@
   "description": "CinnaTool - AI Chat & Todo Desktop Application",
   "main": "dist/main.js",
   "scripts": {
+    "clean": "node scripts/clean-build.mjs dist dist-renderer",
+    "clean:release": "node scripts/clean-build.mjs release",
     "dev": "node scripts/dev.js",
     "dev:renderer": "vite",
     "dev:electron": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron dist/main.js",
-    "build": "tsc -p tsconfig.electron.json && vite build",
+    "build": "npm run clean && tsc -p tsconfig.electron.json && vite build",
     "start": "tsc -p tsconfig.electron.json && vite build && electron dist/main.js",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "build:win": "electron-builder --win --x64",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux"
+    "start:watch": "node scripts/dev.js",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run clean:release && npm run build && electron-builder --win nsis --x64",
+    "build:win": "npm run dist:win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux"
   },
   "keywords": [
     "electron",
@@ -25,23 +29,28 @@
   "author": "Cinna",
   "license": "MIT",
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
+    "@supabase/supabase-js": "^2.108.1"
+  },
+  "devDependencies": {
+    "@ant-design/icons": "^6.2.4",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "antd": "^6.4.3",
+    "dayjs": "^1.11.21",
     "electron": "^42.3.3",
+    "electron-builder": "^25.1.8",
     "electron-store": "^11.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.3.0",
     "typescript": "^5.8.3",
     "uuid": "^14.0.0",
     "vite": "^6.3.5",
     "zustand": "^5.0.14"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@types/uuid": "^10.0.0",
-    "electron-builder": "^25.1.8"
   }
 }

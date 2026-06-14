@@ -1,5 +1,8 @@
 appId: com.cinna.tools
 productName: CinnaTool
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/
 directories:
   output: release
 files:
@@ -9,6 +12,16 @@ files:
 extraResources:
   - from: "src/assets/icon.png"
     to: "assets/icon.png"
+  - from: "src/assets/icon.icns"
+    to: "assets/icon.icns"
+  - from: "src/assets/icon.ico"
+    to: "assets/icon.ico"
+  - from: "src/assets/iconTemplate.png"
+    to: "assets/iconTemplate.png"
+  - from: "src/assets/trayTemplate.png"
+    to: "assets/trayTemplate.png"
+  - from: "src/assets/trayTemplate@2x.png"
+    to: "assets/trayTemplate@2x.png"
   - from: "src/assets/logo_black.png"
     to: "assets/logo_black.png"
   - from: "src/assets/logo_white.png"
@@ -20,21 +33,24 @@ mac:
   target:
     - dmg
     - zip
-  icon: src/assets/icon.png
+  icon: src/assets/icon.icns
 win:
   target:
     - target: nsis
       arch:
         - x64
-    - zip
-  icon: src/assets/icon.png
+  icon: src/assets/icon.ico
 linux:
   target:
     - AppImage
     - deb
   icon: src/assets/icon.png
 nsis:
+  artifactName: ${productName}-Setup-${version}-${arch}.${ext}
+  installerIcon: src/assets/icon.ico
+  uninstallerIcon: src/assets/icon.ico
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
+  shortcutName: CinnaTool
