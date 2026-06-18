@@ -1,9 +1,11 @@
 import { Tray, Menu, nativeImage, BrowserWindow, app, dialog, type NativeImage } from 'electron';
-import { getTrayIconPath } from '../utils/assets';
+import { getTrayIconPath, getTrayIconRetinaPath } from '../utils/assets';
 
 let tray: Tray | null = null;
 let trayWindow: BrowserWindow | null = null;
 let trayLocale: 'zh' | 'en' = 'zh';
+let isMainWindowLocked = () => false;
+const APP_VERSION = '1.0.0';
 
 const labels = {
   zh: {
@@ -29,6 +31,7 @@ function t(key: keyof typeof labels.zh): string {
 }
 
 function showWindow() {
+  if (isMainWindowLocked()) return;
   if (!trayWindow || trayWindow.isDestroyed()) return;
   if (trayWindow.isMinimized()) {
     trayWindow.restore();
@@ -43,6 +46,7 @@ function updateMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: t('show'),
+      enabled: !isMainWindowLocked(),
       click: showWindow,
     },
     { type: 'separator' },
@@ -54,7 +58,7 @@ function updateMenu() {
           title: t('about'),
           message: 'CinnaTool',
           detail: t('detail')
-            .replace('{version}', app.getVersion())
+            .replace('{version}', APP_VERSION)
             .replace('{electron}', process.versions.electron)
             .replace('{chrome}', process.versions.chrome)
             .replace('{node}', process.versions.node),
@@ -86,6 +90,13 @@ function createTrayIcon(): NativeImage {
   const icon = nativeImage.createFromPath(getTrayIconPath());
 
   if (process.platform === 'darwin') {
+    const retinaIcon = nativeImage.createFromPath(getTrayIconRetinaPath());
+    if (!retinaIcon.isEmpty()) {
+      icon.addRepresentation({
+        scaleFactor: 2,
+        dataURL: retinaIcon.toDataURL(),
+      });
+    }
     icon.setTemplateImage(true);
     return icon;
   }
@@ -93,8 +104,9 @@ function createTrayIcon(): NativeImage {
   return icon.resize({ width: 16, height: 16 });
 }
 
-export function createTray(mainWindow: BrowserWindow): void {
+export function createTray(mainWindow: BrowserWindow, isLocked: () => boolean = () => false): void {
   trayWindow = mainWindow;
+  isMainWindowLocked = isLocked;
   const icon = createTrayIcon();
 
   tray = new Tray(icon);
@@ -109,5 +121,9 @@ export function createTray(mainWindow: BrowserWindow): void {
 
 export function updateTrayLocale(locale: 'zh' | 'en'): void {
   trayLocale = locale;
+  updateMenu();
+}
+
+export function refreshTrayMenu(): void {
   updateMenu();
 }

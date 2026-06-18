@@ -163,6 +163,9 @@ export interface ElectronAPI {
   minimize: () => Promise<void>;
   maximize: () => Promise<void>;
   close: () => Promise<void>;
+  openClipboardFloatingWindow: () => Promise<boolean>;
+  restoreClipboardToMainWindow: () => Promise<boolean>;
+  onShowClipboardPage: (callback: () => void) => () => void;
 
   // System information
   platform: NodeJS.Platform;
@@ -177,6 +180,8 @@ export interface ElectronAPI {
 
   // App shell
   setAppLocale: (locale: 'zh' | 'en') => Promise<boolean>;
+  writeClipboardText: (text: string) => Promise<boolean>;
+  openExternalUrl: (url: string) => Promise<boolean>;
   fetchHomeDashboard: (
     locale: 'zh' | 'en',
     period: 'daily' | 'weekly' | 'yearly',

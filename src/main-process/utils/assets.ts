@@ -26,3 +26,7 @@ export function getTrayIconPath(): string {
     ? getAssetPath('icon.ico')
     : getAssetPath('icon.png');
 }
+
+export function getTrayIconRetinaPath(): string {
+  return getAssetPath('trayTemplate@2x.png');
+}

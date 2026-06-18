@@ -8,11 +8,11 @@ import { AppearanceSection } from './components/AppearanceSection';
 import { DownloadsSection } from './components/DownloadsSection';
 import { PerformanceSection } from './components/PerformanceSection';
 import { SettingsNav } from './components/SettingsNav';
-import { UserSection } from './components/UserSection';
 import type { AppPreferences, SectionId, WallpaperKind, WallpaperPickerResult } from './types';
 import './index.css';
 
 const FALLBACK_VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'm4v']);
+const APP_VERSION = '1.0.0';
 
 function getElectronRuntimeVersion(): string {
   const bridgeVersion = window.electronAPI?.version;
@@ -69,11 +69,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ activeSection, onSectionCha
 
   const appInfo = useMemo(
     () => [
+      [t('settings.version'), APP_VERSION],
       ['Electron', getElectronRuntimeVersion()],
       ['Developer', '🧊🍋 icelemon'],
       ['App', 'CinnaTool'],
     ],
-    []
+    [t]
   );
 
   const handleHardwareChange = async (checked: boolean) => {
@@ -161,7 +162,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ activeSection, onSectionCha
             <Input prefix={<SearchOutlined />} placeholder={t('settings.search')} />
           </div>
 
-          {activeSection === 'user' && <UserSection t={t} />}
           {activeSection === 'performance' && (
             <PerformanceSection
               hardwareAcceleration={hardwareAcceleration}

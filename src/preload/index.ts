@@ -5,6 +5,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimize: () => ipcRenderer.invoke('window:minimize'),
   maximize: () => ipcRenderer.invoke('window:maximize'),
   close: () => ipcRenderer.invoke('window:close'),
+  openClipboardFloatingWindow: () => ipcRenderer.invoke('clipboard-window:open'),
+  restoreClipboardToMainWindow: () => ipcRenderer.invoke('clipboard-window:restore-main'),
+  onShowClipboardPage: (callback: () => void) => {
+    const listener = () => callback();
+    ipcRenderer.on('clipboard:show-main', listener);
+    return () => ipcRenderer.removeListener('clipboard:show-main', listener);
+  },
 
   // System information
   platform: process.platform,
@@ -19,6 +26,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // App shell
   setAppLocale: (locale: 'zh' | 'en') => ipcRenderer.invoke('app:set-locale', locale),
+  writeClipboardText: (text: string) => ipcRenderer.invoke('clipboard:write-text', text),
+  openExternalUrl: (url: string) => ipcRenderer.invoke('app:open-external', url),
   fetchHomeDashboard: (
     locale: 'zh' | 'en',
     period: 'daily' | 'weekly' | 'yearly',

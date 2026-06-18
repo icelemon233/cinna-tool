@@ -1,5 +1,5 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
-import { createTray } from './main-process/app/tray';
+import { createTray, refreshTrayMenu } from './main-process/app/tray';
 import { registerIpcHandlers } from './main-process/ipc/index';
 import { registerMediaProtocolHandlers, registerMediaSchemes } from './main-process/protocols/mediaProtocol';
 import { getAppIconPath } from './main-process/utils/assets';
@@ -8,6 +8,7 @@ import { createMainWindow } from './main-process/windows/mainWindow';
 
 let isQuitting = false;
 let mainWindow: BrowserWindow | null = null;
+let isMainWindowLocked = false;
 
 const bootPreferences = loadConfig()['app-preferences'] as { hardwareAcceleration?: boolean } | undefined;
 if (bootPreferences?.hardwareAcceleration === false) {
@@ -18,9 +19,16 @@ registerMediaSchemes();
 
 app.whenReady().then(() => {
   registerMediaProtocolHandlers();
-  registerIpcHandlers({ getMainWindow: () => mainWindow });
+  registerIpcHandlers({
+    getMainWindow: () => mainWindow,
+    isMainWindowLocked: () => isMainWindowLocked,
+    setMainWindowLocked: (locked: boolean) => {
+      isMainWindowLocked = locked;
+      refreshTrayMenu();
+    },
+  });
   mainWindow = createMainWindow(() => isQuitting);
-  createTray(mainWindow);
+  createTray(mainWindow, () => isMainWindowLocked);
 
   if (process.platform === 'darwin' && app.dock) {
     const dockIcon = nativeImage.createFromPath(getAppIconPath());
@@ -28,6 +36,8 @@ app.whenReady().then(() => {
   }
 
   app.on('activate', () => {
+    if (isMainWindowLocked) return;
+
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.show();
     } else {

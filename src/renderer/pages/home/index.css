@@ -69,48 +69,6 @@
   margin-bottom: 16px;
 }
 
-.home-summary-panel {
-  margin-bottom: 16px;
-  padding: 18px;
-  border: 1px solid var(--shell-border);
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent-light) 72%, transparent), transparent),
-    color-mix(in srgb, var(--shell-main-bg) 78%, transparent);
-  backdrop-filter: blur(18px);
-  animation: homeCardIn 0.22s ease;
-}
-
-.home-summary-stack {
-  width: 100%;
-}
-
-.home-summary-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.home-summary-actions {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.home-summary-switch-wrap {
-  display: inline-flex;
-  align-items: center;
-}
-
-.home-summary-hint {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
 .home-dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
@@ -297,11 +255,6 @@
   color: var(--text-secondary);
 }
 
-.home-summary-text {
-  margin: 0;
-  line-height: 1.7;
-}
-
 .home-browser-drawer .ant-drawer-content-wrapper {
   max-width: calc(100vw - 24px);
 }
@@ -374,6 +327,16 @@
   box-shadow: none;
 }
 
+.home-browser-drawer .ant-btn,
+.home-browser-drawer .ant-input,
+.home-browser-drawer .ant-btn * {
+  -webkit-app-region: no-drag;
+}
+
+.home-browser-drawer .ant-btn > * {
+  pointer-events: none;
+}
+
 .home-browser-close.ant-btn:hover,
 .home-browser-close.ant-btn:focus-visible {
   background: var(--accent-light);
@@ -384,20 +347,30 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   padding: 10px 14px;
   border-bottom: 1px solid var(--shell-border);
   background: color-mix(in srgb, var(--shell-main-bg) 88%, transparent);
 }
 
-.home-browser-url {
+.home-browser-address-form {
   min-width: 0;
-  overflow: hidden;
-  color: var(--text-secondary);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 auto;
+}
+
+.home-browser-address-input.ant-input {
+  height: 34px;
+  border-color: var(--shell-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.home-browser-address-input.ant-input:hover,
+.home-browser-address-input.ant-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
 }
 
 .home-browser-frame {
@@ -449,15 +422,6 @@
 
   .home-body {
     padding: 0 18px 22px;
-  }
-
-  .home-summary-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .home-summary-actions {
-    justify-content: flex-start;
   }
 
   .home-browser-drawer .ant-drawer-content-wrapper {

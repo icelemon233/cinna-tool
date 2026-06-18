@@ -5,6 +5,8 @@ export type TrendingPeriod = 'daily' | 'weekly' | 'yearly';
 
 export interface IpcContext {
   getMainWindow: () => BrowserWindow | null;
+  isMainWindowLocked: () => boolean;
+  setMainWindowLocked: (locked: boolean) => void;
 }
 
 export interface WindowState {

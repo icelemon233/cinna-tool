@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, Drawer, Empty, Segmented, Skeleton, Space, Switch, Tag, Tooltip } from 'antd';
+import { Alert, App as AntdApp, Button, Drawer, Empty, Input, Segmented, Skeleton, Tag, Tooltip } from 'antd';
 import {
-  CalendarOutlined,
+  ArrowLeftOutlined,
   CloseOutlined,
+  CopyOutlined,
+  ExportOutlined,
   FireOutlined,
   GithubOutlined,
   GlobalOutlined,
@@ -12,7 +14,7 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from '@/shared/i18n';
-import type { GithubTrendingItem, HomeDashboardData, HomeNewsItem, ModelInfo } from '@/shared/types/electron';
+import type { GithubTrendingItem, HomeDashboardData, HomeNewsItem } from '@/shared/types/electron';
 import './index.css';
 
 type TrendPeriod = 'daily' | 'weekly' | 'yearly';
@@ -24,31 +26,21 @@ interface BrowserDrawerState {
 }
 
 type HomeCache = Map<string, HomeDashboardData>;
-interface HomePreferences {
-  aiSummaryEnabled?: boolean;
-}
-
-interface ChatConfigSnapshot {
-  apiKey?: string;
-  baseUrl?: string;
-  model?: string;
-  modelId?: string;
-}
-
-interface AiSummaryAvailability {
-  available: boolean;
-  signature: string;
-}
 
 interface LoadDataOptions {
   forceRefresh?: boolean;
-  aiSummaryEnabledOverride?: boolean;
-  aiConfigSignatureOverride?: string;
 }
 
 type HomeWebviewElement = HTMLElement & {
+  canGoBack?: () => boolean;
+  getURL?: () => string;
+  goBack?: () => void;
   reload?: () => void;
   stop?: () => void;
+};
+
+type HomeWebviewNavigationEvent = Event & {
+  url?: string;
 };
 
 interface HomePageProps {
@@ -66,58 +58,32 @@ function formatDate(value: string, locale: 'zh' | 'en'): string {
   }).format(timestamp);
 }
 
-function getEffectiveAiConfigSnapshot(
-  config: ChatConfigSnapshot | null,
-  models: ModelInfo[]
-): ChatConfigSnapshot | null {
-  if (!config) return null;
-
-  const selectedModel = models.find((model) => model.id === config.modelId);
-  const baseUrl = (selectedModel && !selectedModel.requiresUrl ? selectedModel.baseUrl : config.baseUrl)?.trim() || '';
-  const model = (selectedModel && !selectedModel.requiresUrl ? selectedModel.model : config.model)?.trim() || '';
-  const apiKey = config.apiKey?.trim() || '';
-
-  if (!apiKey || !baseUrl || !model) return null;
-
-  return {
-    apiKey,
-    baseUrl,
-    model,
-    modelId: selectedModel?.id || config.modelId || '',
-  };
-}
-
-function getAiConfigSignature(config: ChatConfigSnapshot | null, models: ModelInfo[]): string {
-  const effectiveConfig = getEffectiveAiConfigSnapshot(config, models);
-  if (!effectiveConfig) return '';
-  return [
-    effectiveConfig.modelId || '',
-    effectiveConfig.model,
-    effectiveConfig.baseUrl,
-    effectiveConfig.apiKey?.slice(0, 8),
-    effectiveConfig.apiKey?.slice(-4),
-  ].join('|');
+function normalizeBrowserUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ active }) => {
+  const { message } = AntdApp.useApp();
   const { t, locale } = useTranslation();
   const [period, setPeriod] = useState<TrendPeriod>('daily');
   const [data, setData] = useState<HomeDashboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [aiSummaryEnabled, setAiSummaryEnabled] = useState(false);
-  const [aiSummaryAvailable, setAiSummaryAvailable] = useState(false);
-  const [aiConfigSignature, setAiConfigSignature] = useState('');
-  const [aiSummaryAvailabilityChecked, setAiSummaryAvailabilityChecked] = useState(false);
-  const [summaryPreferenceLoaded, setSummaryPreferenceLoaded] = useState(false);
   const [browser, setBrowser] = useState<BrowserDrawerState>({
     open: false,
     title: '',
     url: '',
   });
+  const [browserAddress, setBrowserAddress] = useState('');
+  const [browserCanGoBack, setBrowserCanGoBack] = useState(false);
   const dashboardCacheRef = useRef<HomeCache>(new Map());
   const latestLoadIdRef = useRef(0);
   const webviewRef = useRef<HTMLElement | null>(null);
+  const webviewCleanupRef = useRef<(() => void) | null>(null);
+  const browserAddressFocusedRef = useRef(false);
 
   const periodOptions = useMemo(
     () => [
@@ -128,18 +94,8 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
     [locale]
   );
 
-  const persistAiSummaryPreference = useCallback((enabled: boolean) => {
-    return window.electronAPI?.storeSet?.('home-preferences', { aiSummaryEnabled: enabled }).catch(() => {});
-  }, []);
-
-  const loadData = useCallback(async ({
-    forceRefresh = false,
-    aiSummaryEnabledOverride,
-    aiConfigSignatureOverride,
-  }: LoadDataOptions = {}) => {
-    const shouldUseAiSummary = aiSummaryEnabledOverride ?? aiSummaryEnabled;
-    const summaryConfigSignature = aiConfigSignatureOverride ?? aiConfigSignature;
-    const cacheKey = `${locale}:${period}:${shouldUseAiSummary ? summaryConfigSignature || 'unconfigured' : 'off'}`;
+  const loadData = useCallback(async ({ forceRefresh = false }: LoadDataOptions = {}) => {
+    const cacheKey = `${locale}:${period}`;
     const cachedData = dashboardCacheRef.current.get(cacheKey);
 
     if (!forceRefresh && cachedData) {
@@ -159,9 +115,9 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
         setData({
           news: [],
           trending: [],
-          summary: t('home.summaryEmpty'),
+          summary: '',
           summaryState: {
-            enabled: shouldUseAiSummary,
+            enabled: false,
             available: false,
             generated: false,
             error: '',
@@ -173,24 +129,8 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
         return;
       }
 
-      const nextData = await window.electronAPI.fetchHomeDashboard(locale, period, {
-        aiSummaryEnabled: shouldUseAiSummary,
-      });
+      const nextData = await window.electronAPI.fetchHomeDashboard(locale, period);
       if (loadId !== latestLoadIdRef.current) return;
-
-      if (nextData.summaryState.available !== aiSummaryAvailable) {
-        setAiSummaryAvailable(nextData.summaryState.available);
-      }
-
-      if (shouldUseAiSummary && (
-        !nextData.summaryState.available ||
-        nextData.summaryState.reason === 'auth'
-      )) {
-        setAiSummaryEnabled(false);
-        dashboardCacheRef.current.clear();
-        persistAiSummaryPreference(false);
-        setError(nextData.summaryState.error || t('home.summaryNeedsAiConfig'));
-      }
 
       dashboardCacheRef.current.set(cacheKey, nextData);
       setData(nextData);
@@ -203,135 +143,15 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
         setLoading(false);
       }
     }
-  }, [aiConfigSignature, aiSummaryAvailable, aiSummaryEnabled, locale, period, persistAiSummaryPreference, t]);
-
-  const refreshAiSummaryAvailability = useCallback(async (): Promise<AiSummaryAvailability> => {
-    if (!window.electronAPI?.storeGet) {
-      setAiSummaryAvailable(false);
-      setAiConfigSignature('');
-      setAiSummaryAvailabilityChecked(true);
-      return { available: false, signature: '' };
-    }
-
-    try {
-      setAiSummaryAvailabilityChecked(false);
-      const [config, models] = await Promise.all([
-        window.electronAPI.storeGet('config') as Promise<ChatConfigSnapshot | null>,
-        window.electronAPI.getModels?.().catch(() => [] as ModelInfo[]) ?? Promise.resolve([] as ModelInfo[]),
-      ]);
-      const signature = getAiConfigSignature(config, models);
-      const available = Boolean(signature);
-      setAiSummaryAvailable(available);
-      setAiConfigSignature(signature);
-      return { available, signature };
-    } catch {
-      setAiSummaryAvailable(false);
-      setAiConfigSignature('');
-      return { available: false, signature: '' };
-    } finally {
-      setAiSummaryAvailabilityChecked(true);
-    }
-  }, []);
+  }, [locale, period, t]);
 
   useEffect(() => {
     if (!active) return;
-    refreshAiSummaryAvailability();
-  }, [active, refreshAiSummaryAvailability]);
-
-  useEffect(() => {
-    if (!active || !summaryPreferenceLoaded || !aiSummaryAvailabilityChecked) return;
-    if (aiSummaryEnabled && !aiSummaryAvailable) return;
     loadData();
-  }, [
-    active,
-    aiSummaryAvailabilityChecked,
-    aiSummaryAvailable,
-    aiSummaryEnabled,
-    loadData,
-    summaryPreferenceLoaded,
-  ]);
-
-  useEffect(() => {
-    if (!window.electronAPI?.storeGet) {
-      setSummaryPreferenceLoaded(true);
-      return;
-    }
-
-    let alive = true;
-    window.electronAPI.storeGet('home-preferences')
-      .then((stored) => {
-        if (!alive) return;
-        const preferences = stored as HomePreferences | null;
-        setAiSummaryEnabled(Boolean(preferences?.aiSummaryEnabled));
-      })
-      .finally(() => {
-        if (alive) setSummaryPreferenceLoaded(true);
-      });
-
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!summaryPreferenceLoaded || !aiSummaryAvailabilityChecked || aiSummaryAvailable || !aiSummaryEnabled) return;
-    setAiSummaryEnabled(false);
-    dashboardCacheRef.current.clear();
-    persistAiSummaryPreference(false);
-  }, [
-    aiSummaryAvailabilityChecked,
-    aiSummaryAvailable,
-    aiSummaryEnabled,
-    persistAiSummaryPreference,
-    summaryPreferenceLoaded,
-  ]);
-
-  const handleAiSummaryToggle = async (checked: boolean) => {
-    if (checked) {
-      const availability = await refreshAiSummaryAvailability();
-      if (!availability.available) {
-        setError(t('home.summaryNeedsAiConfig'));
-        setAiSummaryEnabled(false);
-        persistAiSummaryPreference(false);
-        return;
-      }
-    }
-
-    setError('');
-    setAiSummaryEnabled(checked);
-    await persistAiSummaryPreference(checked);
-    dashboardCacheRef.current.clear();
-  };
+  }, [active, loadData]);
 
   const handleDashboardRefresh = async () => {
-    let nextAiSummaryEnabled = aiSummaryEnabled;
-    let nextAiConfigSignature = aiConfigSignature;
-    let shouldShowConfigError = false;
-
-    if (aiSummaryEnabled) {
-      const availability = await refreshAiSummaryAvailability();
-      nextAiConfigSignature = availability.signature;
-      if (!availability.available) {
-        nextAiSummaryEnabled = false;
-        shouldShowConfigError = true;
-        setAiSummaryEnabled(false);
-        dashboardCacheRef.current.clear();
-        persistAiSummaryPreference(false);
-      }
-    } else {
-      const availability = await refreshAiSummaryAvailability();
-      nextAiConfigSignature = availability.signature;
-    }
-
-    await loadData({
-      forceRefresh: true,
-      aiSummaryEnabledOverride: nextAiSummaryEnabled,
-      aiConfigSignatureOverride: nextAiConfigSignature,
-    });
-
-    if (shouldShowConfigError) {
-      setError(t('home.summaryNeedsAiConfig'));
-    }
+    await loadData({ forceRefresh: true });
   };
 
   const closeBrowserDrawer = useCallback(() => {
@@ -339,6 +159,8 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
     webview?.stop?.();
     webview?.setAttribute('src', 'about:blank');
     setBrowser({ open: false, title: '', url: '' });
+    setBrowserAddress('');
+    setBrowserCanGoBack(false);
   }, []);
 
   const handleBrowserClosePointerDown = useCallback((
@@ -389,16 +211,145 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
   ) => {
     event.preventDefault();
     setBrowser({ open: true, title, url });
+    setBrowserAddress(url);
+    setBrowserCanGoBack(false);
+  }, []);
+
+  const getBrowserAddress = useCallback(() => {
+    return normalizeBrowserUrl(browserAddress || browser.url);
+  }, [browser.url, browserAddress]);
+
+  const handleBrowserAddressSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextUrl = getBrowserAddress();
+    if (!nextUrl) return;
+    browserAddressFocusedRef.current = false;
+    event.currentTarget.querySelector('input')?.blur();
+    setBrowser((current) => ({
+      ...current,
+      title: current.title || nextUrl,
+      url: nextUrl,
+    }));
+    setBrowserAddress(nextUrl);
+  }, [getBrowserAddress]);
+
+  const handleCopyBrowserAddress = useCallback(async () => {
+    const nextUrl = getBrowserAddress();
+    if (!nextUrl) return;
+
+    try {
+      if (window.electronAPI?.writeClipboardText) {
+        await window.electronAPI.writeClipboardText(nextUrl);
+      } else {
+        await navigator.clipboard.writeText(nextUrl);
+      }
+      message.success(t('home.browserCopied'));
+    } catch {
+      message.warning(t('home.browserCopyFailed'));
+    }
+  }, [getBrowserAddress, message, t]);
+
+  const handleOpenExternalBrowser = useCallback(async () => {
+    const nextUrl = getBrowserAddress();
+    if (!nextUrl) return;
+
+    try {
+      if (window.electronAPI?.openExternalUrl) {
+        await window.electronAPI.openExternalUrl(nextUrl);
+      } else {
+        window.open(nextUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch {
+      message.warning(t('home.browserOpenExternalFailed'));
+    }
+  }, [getBrowserAddress, message, t]);
+
+  const updateBrowserNavigationState = useCallback((
+    webview: HomeWebviewElement | null = webviewRef.current as HomeWebviewElement | null,
+    event?: Event
+  ) => {
+    const eventUrl = (event as HomeWebviewNavigationEvent | undefined)?.url;
+    const nextUrl = eventUrl || webview?.getURL?.() || '';
+
+    try {
+      setBrowserCanGoBack(Boolean(webview?.canGoBack?.()));
+    } catch {
+      setBrowserCanGoBack(false);
+    }
+
+    if (nextUrl) {
+      if (!browserAddressFocusedRef.current) {
+        setBrowserAddress(nextUrl);
+      }
+    }
+  }, []);
+
+  const handleBrowserBack = useCallback(() => {
+    const webview = webviewRef.current as HomeWebviewElement | null;
+    if (!webview?.canGoBack?.()) {
+      setBrowserCanGoBack(false);
+      return;
+    }
+    webview.goBack?.();
+    window.setTimeout(() => updateBrowserNavigationState(webview), 100);
+    window.setTimeout(() => updateBrowserNavigationState(webview), 300);
+  }, [updateBrowserNavigationState]);
+
+  const bindBrowserWebview = useCallback((node: HTMLElement | null) => {
+    webviewCleanupRef.current?.();
+    webviewCleanupRef.current = null;
+    webviewRef.current = node;
+
+    if (!node) {
+      setBrowserCanGoBack(false);
+      return;
+    }
+
+    const webview = node as HomeWebviewElement;
+
+    const handleNavigationEvent = (event: Event) => {
+      updateBrowserNavigationState(webview, event);
+      window.setTimeout(() => updateBrowserNavigationState(webview, event), 100);
+      window.setTimeout(() => updateBrowserNavigationState(webview, event), 300);
+    };
+
+    const eventNames = [
+      'dom-ready',
+      'did-start-navigation',
+      'did-redirect-navigation',
+      'did-navigate',
+      'did-navigate-in-page',
+      'did-finish-load',
+      'page-title-updated',
+    ];
+
+    eventNames.forEach((eventName) => {
+      webview.addEventListener(eventName, handleNavigationEvent);
+    });
+    const navigationPollTimer = window.setInterval(() => {
+      updateBrowserNavigationState(webview);
+    }, 500);
+    window.setTimeout(() => updateBrowserNavigationState(webview), 0);
+    window.setTimeout(() => updateBrowserNavigationState(webview), 300);
+
+    webviewCleanupRef.current = () => {
+      window.clearInterval(navigationPollTimer);
+      eventNames.forEach((eventName) => {
+        webview.removeEventListener(eventName, handleNavigationEvent);
+      });
+    };
+  }, [updateBrowserNavigationState]);
+
+  useEffect(() => {
+    return () => {
+      webviewCleanupRef.current?.();
+      webviewCleanupRef.current = null;
+    };
   }, []);
 
   const news = data?.news ?? [];
   const trending = data?.trending ?? [];
-  const summaryState = data?.summaryState;
   const browserCloseLabel = locale === 'zh' ? '关闭浏览器' : 'Close browser';
-  const summarySwitchDisabled = !aiSummaryAvailabilityChecked || !aiSummaryAvailable || loading;
-  const summarySwitchTip = aiSummaryAvailable
-    ? t('home.summaryToggleTip')
-    : t('home.summaryNeedsAiConfig');
 
   return (
     <section className={`home-page${active ? ' is-active' : ''}`}>
@@ -424,41 +375,6 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
           <Skeleton active paragraph={{ rows: 10 }} />
         ) : (
           <>
-            <section className="home-summary-panel">
-              <Space className="home-summary-stack" orientation="vertical" size={8}>
-                <div className="home-summary-header">
-                  <span className="home-strong-text">
-                    <CalendarOutlined /> {t('home.summary')}
-                  </span>
-                  <span className="home-summary-actions">
-                    {summaryState?.generated && <Tag color="success">{t('home.summaryAiGenerated')}</Tag>}
-                    {summaryState?.enabled && !summaryState.generated && summaryState.error && (
-                      <Tag color="warning">{t('home.summaryAiFailed')}</Tag>
-                    )}
-                    <Tooltip title={summarySwitchTip}>
-                      <span className="home-summary-switch-wrap">
-                        <Switch
-                          checked={aiSummaryEnabled && aiSummaryAvailable}
-                          checkedChildren={t('home.summaryOn')}
-                          disabled={summarySwitchDisabled}
-                          loading={loading && aiSummaryEnabled}
-                          onChange={handleAiSummaryToggle}
-                          size="small"
-                          unCheckedChildren={t('home.summaryOff')}
-                        />
-                      </span>
-                    </Tooltip>
-                  </span>
-                </div>
-                <p className="home-summary-text">
-                  {data?.summary || t('home.summaryEmpty')}
-                </p>
-                {!aiSummaryAvailable && (
-                  <p className="home-summary-hint">{t('home.summaryNeedsAiConfig')}</p>
-                )}
-              </Space>
-            </section>
-
             <div className="home-dashboard-grid">
               <section className="home-panel">
                 <div className="home-panel-header">
@@ -586,9 +502,45 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
       >
         <div className="home-browser-shell">
           <div className="home-browser-toolbar">
-            <span className="home-browser-url" title={browser.url}>
-              {browser.url}
-            </span>
+            <Tooltip title={t('home.browserBack')}>
+              <Button
+                aria-label={t('home.browserBack')}
+                disabled={!browserCanGoBack}
+                icon={<ArrowLeftOutlined />}
+                onClick={handleBrowserBack}
+              />
+            </Tooltip>
+            <form className="home-browser-address-form" onSubmit={handleBrowserAddressSubmit}>
+              <Input
+                className="home-browser-address-input"
+                value={browserAddress}
+                title={browserAddress}
+                aria-label={t('home.browserAddress')}
+                spellCheck={false}
+                onBlur={() => {
+                  browserAddressFocusedRef.current = false;
+                  updateBrowserNavigationState();
+                }}
+                onChange={(event) => setBrowserAddress(event.target.value)}
+                onFocus={() => {
+                  browserAddressFocusedRef.current = true;
+                }}
+              />
+            </form>
+            <Tooltip title={t('home.browserCopyUrl')}>
+              <Button
+                aria-label={t('home.browserCopyUrl')}
+                icon={<CopyOutlined />}
+                onClick={handleCopyBrowserAddress}
+              />
+            </Tooltip>
+            <Tooltip title={t('home.browserOpenExternal')}>
+              <Button
+                aria-label={t('home.browserOpenExternal')}
+                icon={<ExportOutlined />}
+                onClick={handleOpenExternalBrowser}
+              />
+            </Tooltip>
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
@@ -601,7 +553,7 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
           <div className="home-browser-frame">
             {browser.url && (
               <webview
-                ref={webviewRef}
+                ref={bindBrowserWebview}
                 className="home-browser-webview"
                 src={browser.url}
                 partition="persist:cinnatool-home-browser"

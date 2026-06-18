@@ -4,7 +4,6 @@ import {
   DownloadOutlined,
   InfoCircleOutlined,
   ThunderboltOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import type { ThemeType } from '@/shared/store/settingsStore';
 import type { SectionId } from './types';
@@ -19,7 +18,6 @@ export const themeOptions: Array<{ id: ThemeType; labelKey: string; color: strin
 ];
 
 export const sections: Array<{ id: SectionId; icon: React.ReactNode; labelKey: string }> = [
-  { id: 'user', icon: <UserOutlined />, labelKey: 'settings.user' },
   { id: 'performance', icon: <ThunderboltOutlined />, labelKey: 'settings.performance' },
   { id: 'appearance', icon: <BgColorsOutlined />, labelKey: 'settings.appearance' },
   { id: 'downloads', icon: <DownloadOutlined />, labelKey: 'settings.downloads' },

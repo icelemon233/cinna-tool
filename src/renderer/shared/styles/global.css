@@ -172,3 +172,24 @@
     }
   }
 }
+
+@layer components {
+  .ant-popover,
+  .ant-popover *,
+  .ant-tooltip,
+  .ant-tooltip *,
+  .ant-dropdown,
+  .ant-dropdown *,
+  .ant-modal-root,
+  .ant-modal-root *,
+  .ant-picker-dropdown,
+  .ant-picker-dropdown *,
+  .ant-select-dropdown,
+  .ant-select-dropdown *,
+  .ant-message,
+  .ant-message *,
+  .ant-notification,
+  .ant-notification * {
+    -webkit-app-region: no-drag;
+  }
+}

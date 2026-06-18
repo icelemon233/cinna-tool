@@ -5,8 +5,8 @@ const http = require('http');
 const net = require('net');
 
 const root = path.resolve(__dirname, '..');
-const VITE_PORT = 5173;
-const VITE_URL = `http://localhost:${VITE_PORT}`;
+const DEFAULT_VITE_PORT = 5173;
+const MAX_PORT_ATTEMPTS = 20;
 const DIST_DIR = path.join(root, 'dist');
 const DIST_MAIN = path.join(DIST_DIR, 'main.js');
 const WATCHED_ELECTRON_ENTRY_FILES = new Set(['main.js', 'preload.js', 'tray.js']);
@@ -14,6 +14,8 @@ const WATCHED_ELECTRON_ENTRY_FILES = new Set(['main.js', 'preload.js', 'tray.js'
 let electron = null;
 let vite = null;
 let tsc = null;
+let vitePort = DEFAULT_VITE_PORT;
+let viteUrl = `http://localhost:${DEFAULT_VITE_PORT}`;
 let restartingElectron = false;
 let restartTimer = null;
 let electronWatchers = [];
@@ -59,11 +61,33 @@ function canListenOn(port, host) {
   });
 }
 
+async function canUsePort(port) {
+  const endpointActive = await isHttpEndpointActive(`http://localhost:${port}`);
+  if (endpointActive) return false;
+
+  const [ipv4Available, ipv6Available] = await Promise.all([
+    canListenOn(port, '127.0.0.1'),
+    canListenOn(port, '::1'),
+  ]);
+  return ipv4Available && ipv6Available;
+}
+
+async function findAvailablePort(startPort) {
+  for (let offset = 0; offset < MAX_PORT_ATTEMPTS; offset += 1) {
+    const port = startPort + offset;
+    if (await canUsePort(port)) return port;
+  }
+
+  throw new Error(
+    `No available Vite port found from ${startPort} to ${startPort + MAX_PORT_ATTEMPTS - 1}.`
+  );
+}
+
 // 3. Wait for Vite + tsc, then launch Electron
 function waitForVite() {
   return new Promise((resolve) => {
     const check = () => {
-      http.get(VITE_URL, (res) => {
+      http.get(viteUrl, (res) => {
         if (res.statusCode === 200) resolve();
         else setTimeout(check, 500);
       }).on('error', () => setTimeout(check, 500));
@@ -105,7 +129,7 @@ function launchElectron() {
     stdio: 'inherit',
     env: {
       ...process.env,
-      VITE_DEV_SERVER_URL: VITE_URL,
+      VITE_DEV_SERVER_URL: viteUrl,
       CINNATOOL_DEV_BACKGROUND_START: shouldStartInBackground ? '1' : '0'
     }
   });
@@ -199,21 +223,22 @@ process.on('SIGTERM', () => {
 });
 
 async function start() {
-  const existingDevServer = await isHttpEndpointActive(VITE_URL);
-  const [ipv4Available, ipv6Available] = await Promise.all([
-    canListenOn(VITE_PORT, '127.0.0.1'),
-    canListenOn(VITE_PORT, '::1'),
-  ]);
-
-  if (existingDevServer || !ipv4Available || !ipv6Available) {
-    console.error(`[dev] Port ${VITE_PORT} is already in use. Stop the existing dev server, then run pnpm run dev again.`);
+  try {
+    vitePort = await findAvailablePort(DEFAULT_VITE_PORT);
+  } catch (error) {
+    console.error(`[dev] ${error.message}`);
     process.exit(1);
+  }
+
+  viteUrl = `http://localhost:${vitePort}`;
+  if (vitePort !== DEFAULT_VITE_PORT) {
+    console.log(`[dev] Port ${DEFAULT_VITE_PORT} is already in use. Using ${vitePort} instead.`);
   }
 
   // 1. Start Vite dev server on the exact port Electron will load.
   vite = run(
     'node',
-    ['node_modules/vite/bin/vite.js', '--host', 'localhost', '--port', String(VITE_PORT), '--strictPort'],
+    ['node_modules/vite/bin/vite.js', '--host', 'localhost', '--port', String(vitePort), '--strictPort'],
     'vite'
   );
 

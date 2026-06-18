@@ -5,7 +5,7 @@ import enUS from 'antd/locale/en_US';
 import {
   CalendarOutlined,
   CheckSquareOutlined,
-  CodeOutlined,
+  CopyOutlined,
   FileSearchOutlined,
   HomeOutlined,
   MessageOutlined,
@@ -19,19 +19,20 @@ import ImageViewer from '@/pages/image-viewer';
 import HomePage from '@/pages/home';
 import type { SectionId } from '@/pages/settings/types';
 import { useSettingsStore } from '@/shared/store/settingsStore';
-import { useUserStore } from '@/shared/store/userStore';
 import { useTranslation } from '@/shared/i18n';
 import { getAntdTheme } from './theme';
 import './index.css';
 
-type Page = 'home' | 'todo' | 'schedule' | 'chat' | 'cc' | 'reader' | 'search' | 'images' | 'settings';
+type Page = 'home' | 'todo' | 'schedule' | 'clipboard' | 'chat' | 'reader' | 'search' | 'images' | 'settings';
 
 const ChatPage = lazy(() => import('@/pages/chat'));
-const ClaudeCodePage = lazy(() => import('@/pages/claude-code'));
+const ClipboardPage = lazy(() => import('@/pages/clipboard'));
 const QuickSearch = lazy(() => import('@/pages/quick-search'));
 const SchedulePage = lazy(() => import('@/pages/schedule'));
 const SettingsPage = lazy(() => import('@/pages/settings'));
 const TodoPage = lazy(() => import('@/pages/todo'));
+const isClipboardFloatingWindow =
+  new URLSearchParams(window.location.search).get('window') === 'clipboard-floating';
 
 function toCssUrl(url?: string): string | undefined {
   if (!url) return undefined;
@@ -48,7 +49,7 @@ function PageFallback() {
 
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
-  const [settingsSection, setSettingsSection] = useState<SectionId>('user');
+  const [settingsSection, setSettingsSection] = useState<SectionId>('appearance');
   const [mountedPages, setMountedPages] = useState<Set<Page>>(() => new Set(['home']));
   const {
     theme,
@@ -59,7 +60,6 @@ const App: React.FC = () => {
     dynamicWallpaperFile,
     setDynamicWallpaperFile,
   } = useSettingsStore();
-  const initializeAuth = useUserStore((state) => state.initializeAuth);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -67,13 +67,15 @@ const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    void initializeAuth();
-  }, [initializeAuth]);
-
-  useEffect(() => {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
     window.electronAPI?.setAppLocale(language).catch(() => {});
   }, [language]);
+
+  useEffect(() => {
+    return window.electronAPI?.onShowClipboardPage?.(() => {
+      setPage('clipboard');
+    });
+  }, []);
 
   useEffect(() => {
     setMountedPages((current) => {
@@ -147,6 +149,21 @@ const App: React.FC = () => {
     setPage('settings');
   };
 
+  if (isClipboardFloatingWindow) {
+    return (
+      <ConfigProvider
+        locale={language === 'zh' ? zhCN : enUS}
+        theme={getAntdTheme(theme)}
+      >
+        <AntdApp>
+          <Suspense fallback={<PageFallback />}>
+            <ClipboardPage mode="floating" />
+          </Suspense>
+        </AntdApp>
+      </ConfigProvider>
+    );
+  }
+
   return (
     <ConfigProvider
       locale={language === 'zh' ? zhCN : enUS}
@@ -183,14 +200,14 @@ const App: React.FC = () => {
                   label: t('nav.schedule'),
                 },
                 {
+                  key: 'clipboard',
+                  icon: <CopyOutlined />,
+                  label: t('nav.clipboard'),
+                },
+                {
                   key: 'chat',
                   icon: <MessageOutlined />,
                   label: t('nav.chat'),
-                },
-                {
-                  key: 'cc',
-                  icon: <CodeOutlined />,
-                  label: t('nav.claudeCode'),
                 },
                 {
                   key: 'reader',
@@ -247,7 +264,6 @@ const App: React.FC = () => {
             )}
             <TopBar
               onOpenSettings={() => openSettings()}
-              onOpenUserSettings={() => openSettings('user')}
             />
             <main className="app-content-area">
               <div className="app-page-wrapper">
@@ -257,11 +273,11 @@ const App: React.FC = () => {
                     {isPageMounted('todo') && <TodoPage />}
                   </div>
                   {isPageMounted('schedule') && <SchedulePage active={page === 'schedule'} />}
+                  <div className={`app-page-slot${page === 'clipboard' ? ' is-active' : ''}`}>
+                    {isPageMounted('clipboard') && <ClipboardPage mode="main" />}
+                  </div>
                   <div className={`app-page-slot${page === 'chat' ? ' is-active' : ''}`}>
                     {isPageMounted('chat') && <ChatPage />}
-                  </div>
-                  <div className={`app-page-slot${page === 'cc' ? ' is-active' : ''}`}>
-                    {isPageMounted('cc') && <ClaudeCodePage />}
                   </div>
                   <QuickReader
                     active={page === 'reader'}

@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { clipboard, ipcMain, shell } from 'electron';
 import { updateTrayLocale } from '../app/tray';
 import { fetchHomeDashboard } from '../services/homeDashboard';
 import { getModelList } from '../services/models';
@@ -9,6 +9,16 @@ export function registerAppHandlers(): void {
 
   ipcMain.handle('app:set-locale', (_event, locale: AppLocale) => {
     updateTrayLocale(locale);
+    return true;
+  });
+
+  ipcMain.handle('clipboard:write-text', (_event, text: string) => {
+    clipboard.writeText(text);
+    return true;
+  });
+
+  ipcMain.handle('app:open-external', async (_event, url: string) => {
+    await shell.openExternal(url);
     return true;
   });
 
