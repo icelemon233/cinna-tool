@@ -9,6 +9,7 @@ export interface TodoState {
   currentView: ViewType;
   currentListId: string | null;
   searchQuery: string;
+  todayKey: string;
 }
 
 export interface TodoActions {
@@ -30,9 +31,24 @@ export interface TodoActions {
   addList: (name: string, icon: string) => void;
   deleteList: (id: string) => void;
   clearCompleted: () => void;
+  refreshMyDay: () => void;
 }
 
 export type TodoStore = TodoState & TodoActions;
+
+export function getLocalDateKey(timestamp = Date.now()): string {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getTodoMyDayDate(todo: Todo): string | undefined {
+  if (todo.myDayDate) return todo.myDayDate;
+  const fallbackTimestamp = todo.updatedAt || todo.createdAt;
+  return fallbackTimestamp ? getLocalDateKey(fallbackTimestamp) : undefined;
+}
 
 export const useTodoStore = create<TodoStore>()(
   persist(
@@ -43,10 +59,12 @@ export const useTodoStore = create<TodoStore>()(
       currentView: 'my-day',
       currentListId: null,
       searchQuery: '',
+      todayKey: getLocalDateKey(),
 
       // Actions
       addTodo: (title, options = {}) => {
         const now = Date.now();
+        const todayKey = getLocalDateKey(now);
         const newTodo: Todo = {
           id: uuidv4(),
           title,
@@ -55,6 +73,7 @@ export const useTodoStore = create<TodoStore>()(
           important: options.important ?? false,
           dueDate: options.dueDate,
           myDay: options.myDay ?? false,
+          myDayDate: options.myDay ? todayKey : undefined,
           listId: options.listId,
           createdAt: now,
           updatedAt: now,
@@ -100,11 +119,18 @@ export const useTodoStore = create<TodoStore>()(
 
       toggleMyDay: (id) => {
         set((state) => ({
-          todos: state.todos.map((todo) =>
-            todo.id === id
-              ? { ...todo, myDay: !todo.myDay, updatedAt: Date.now() }
-              : todo
-          ),
+          todos: state.todos.map((todo) => {
+            if (todo.id !== id) return todo;
+
+            const now = Date.now();
+            const myDay = !todo.myDay;
+            return {
+              ...todo,
+              myDay,
+              myDayDate: myDay ? getLocalDateKey(now) : undefined,
+              updatedAt: now,
+            };
+          }),
         }));
       },
 
@@ -150,6 +176,35 @@ export const useTodoStore = create<TodoStore>()(
         set((state) => ({
           todos: state.todos.filter((todo) => !todo.completed),
         }));
+      },
+
+      refreshMyDay: () => {
+        set((state) => {
+          const now = Date.now();
+          const todayKey = getLocalDateKey(now);
+          let changed = state.todayKey !== todayKey;
+
+          const todos = state.todos.map((todo) => {
+            if (!todo.myDay) return todo;
+
+            const myDayDate = getTodoMyDayDate(todo);
+            if (myDayDate === todayKey) {
+              if (todo.myDayDate) return todo;
+              changed = true;
+              return { ...todo, myDayDate: todayKey };
+            }
+
+            changed = true;
+            return {
+              ...todo,
+              myDay: false,
+              myDayDate: undefined,
+              updatedAt: now,
+            };
+          });
+
+          return changed ? { todayKey, todos } : {};
+        });
       },
     }),
     {

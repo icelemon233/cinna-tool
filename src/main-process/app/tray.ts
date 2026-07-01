@@ -1,5 +1,6 @@
 import { Tray, Menu, nativeImage, BrowserWindow, app, dialog, type NativeImage } from 'electron';
 import { getTrayIconPath, getTrayIconRetinaPath } from '../utils/assets';
+import { revealMainWindow } from '../windows/mainWindow';
 
 let tray: Tray | null = null;
 let trayWindow: BrowserWindow | null = null;
@@ -33,11 +34,7 @@ function t(key: keyof typeof labels.zh): string {
 function showWindow() {
   if (isMainWindowLocked()) return;
   if (!trayWindow || trayWindow.isDestroyed()) return;
-  if (trayWindow.isMinimized()) {
-    trayWindow.restore();
-  }
-  trayWindow.show();
-  trayWindow.focus();
+  revealMainWindow(trayWindow);
 }
 
 function updateMenu() {

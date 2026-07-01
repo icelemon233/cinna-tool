@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 import {
-  createReaderFromPastedText,
-  isEditableTarget,
   isJsonFile,
   isSupportedReaderFile,
   readReaderFile,
@@ -29,35 +27,7 @@ export function useQuickReaderEvents({
       setReader(emptyReader);
     };
 
-    const handlePaste = (event: ClipboardEvent) => {
-      if (isEditableTarget(event.target)) return;
-
-      const text = event.clipboardData?.getData('text/plain') ?? '';
-      try {
-        const nextReader = createReaderFromPastedText(text, t);
-        if (!nextReader) return;
-        event.preventDefault();
-        onActivate();
-        setReader(nextReader);
-      } catch {
-        event.preventDefault();
-        message.warning(t('quickReader.jsonInvalid'));
-      }
-    };
-
-    const handleDragOver = (event: DragEvent) => {
-      if (!Array.from(event.dataTransfer?.types ?? []).includes('Files')) return;
-      event.preventDefault();
-      if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = 'copy';
-      }
-    };
-
-    const handleDrop = async (event: DragEvent) => {
-      const file = Array.from(event.dataTransfer?.files ?? []).find(isSupportedReaderFile);
-      if (!file) return;
-
-      event.preventDefault();
+    const openFile = async (file: File) => {
       try {
         const nextReader = await readReaderFile(file);
         onActivate();
@@ -67,16 +37,19 @@ export function useQuickReaderEvents({
       }
     };
 
+    const handleOpenFile = (event: Event) => {
+      const file = (event as CustomEvent<{ file?: File }>).detail?.file;
+      if (!file || !isSupportedReaderFile(file)) return;
+
+      void openFile(file);
+    };
+
     window.addEventListener('quick-reader:open', handleOpen);
-    document.addEventListener('paste', handlePaste);
-    window.addEventListener('dragover', handleDragOver);
-    window.addEventListener('drop', handleDrop);
+    window.addEventListener('quick-reader:open-file', handleOpenFile);
 
     return () => {
       window.removeEventListener('quick-reader:open', handleOpen);
-      document.removeEventListener('paste', handlePaste);
-      window.removeEventListener('dragover', handleDragOver);
-      window.removeEventListener('drop', handleDrop);
+      window.removeEventListener('quick-reader:open-file', handleOpenFile);
     };
   }, [message, onActivate, setReader, t]);
 }

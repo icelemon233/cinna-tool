@@ -53,6 +53,7 @@ const TodoSidebar: React.FC = () => {
   const [newListName, setNewListName] = useState('');
   const [newListIcon, setNewListIcon] = useState('📋');
   const inputRef = useRef<InputRef>(null);
+  const normalizedSearchQuery = typeof searchQuery === 'string' ? searchQuery : '';
 
   useEffect(() => {
     if (creatingList) {
@@ -82,7 +83,7 @@ const TodoSidebar: React.FC = () => {
     return { all, important, listCounts, myDay, planned };
   }, [todos]);
 
-  const selectedKey = searchQuery
+  const selectedKey = normalizedSearchQuery
     ? ''
     : currentView === 'list' && currentListId
       ? `list:${currentListId}`
@@ -166,7 +167,7 @@ const TodoSidebar: React.FC = () => {
         <Input
           prefix={<SearchOutlined />}
           placeholder={t('todo.search')}
-          value={searchQuery}
+          value={normalizedSearchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           allowClear
         />

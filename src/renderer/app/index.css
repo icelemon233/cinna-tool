@@ -75,6 +75,37 @@
     display: inline-block;
   }
 
+  .app-sidebar .app-nav-label {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
+  }
+
+  .app-sidebar .app-nav-label-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-sidebar .app-nav-label-count {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #ff4d4f;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    padding: 0 5px;
+  }
+
   .app-sidebar-bottom {
     @apply mt-auto pt-2.5;
     -webkit-app-region: no-drag;
@@ -144,6 +175,8 @@
 
   .app-shell[data-has-wallpaper='true'] .quick-reader-page,
   .app-shell[data-has-wallpaper='true'] .quick-search-page,
+  .app-shell[data-has-wallpaper='true'] .code-diff-page,
+  .app-shell[data-has-wallpaper='true'] .log-analysis-page,
   .app-shell[data-has-wallpaper='true'] .image-viewer-page,
   .app-shell[data-has-wallpaper='true'] .clipboard-page,
   .app-shell[data-has-wallpaper='true'] .chat-page,
@@ -152,6 +185,8 @@
   .app-shell[data-has-wallpaper='true'] .todo-page-content,
   .app-shell[data-has-dynamic-wallpaper='true'] .quick-reader-page,
   .app-shell[data-has-dynamic-wallpaper='true'] .quick-search-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .code-diff-page,
+  .app-shell[data-has-dynamic-wallpaper='true'] .log-analysis-page,
   .app-shell[data-has-dynamic-wallpaper='true'] .image-viewer-page,
   .app-shell[data-has-dynamic-wallpaper='true'] .clipboard-page,
   .app-shell[data-has-dynamic-wallpaper='true'] .chat-page,
@@ -221,6 +256,16 @@
     .app-sidebar .ant-menu-title-content,
     .sidebar-action-label {
       display: inline-block !important;
+    }
+
+    .app-sidebar .ant-menu-title-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .app-sidebar .app-nav-label {
+      width: 100%;
+      justify-content: space-between;
     }
 
     .app-sidebar-action {
@@ -315,6 +360,24 @@
       font-size: 11px;
       line-height: 1.15;
       white-space: nowrap;
+    }
+
+    .app-sidebar .app-nav-label {
+      max-width: 74px;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .app-sidebar .app-nav-label-text {
+      max-width: 52px;
+    }
+
+    .app-sidebar .app-nav-label-count {
+      min-width: 15px;
+      height: 15px;
+      font-size: 10px;
+      line-height: 15px;
+      padding: 0 4px;
     }
 
     .app-sidebar-bottom {

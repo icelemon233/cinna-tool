@@ -1,4 +1,4 @@
-import { Button, Empty, Space, Typography } from 'antd';
+import { Button, Space, Typography } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 import type React from 'react';
 import { useSettingsStore } from '@/shared/store/settingsStore';
@@ -30,21 +30,18 @@ export function ChatWelcome({
     return (
       <div className="chat-welcome">
         <div className="chat-welcome-inner">
-          <Empty
-            image={<img className="chat-welcome-logo" src={logo} alt="CinnaTool" />}
-            description={
-              <Space orientation="vertical" size={4}>
-                <Typography.Title className="chat-welcome-title" level={2}>
-                  {greeting}
-                </Typography.Title>
-                <Typography.Text type="secondary">{t('chat.welcomeDesc')}</Typography.Text>
-              </Space>
-            }
-          >
+          <div className="chat-welcome-content">
+            <img className="chat-welcome-logo" src={logo} alt="CinnaTool" />
+            <Space className="chat-welcome-copy" orientation="vertical" size={4}>
+              <Typography.Title className="chat-welcome-title" level={2}>
+                {greeting}
+              </Typography.Title>
+              <Typography.Text type="secondary">{t('chat.welcomeDesc')}</Typography.Text>
+            </Space>
             <Button type="primary" icon={<SettingOutlined />} onClick={onOpenSettings}>
               {t('chat.goSettings')}
             </Button>
-          </Empty>
+          </div>
         </div>
       </div>
     );
@@ -54,16 +51,14 @@ export function ChatWelcome({
     <div className="chat-welcome">
       <div className="chat-welcome-inner">
         <Space className="chat-welcome-stack" orientation="vertical" size={20}>
-          <Empty
-            image={<img className="chat-welcome-logo" src={logo} alt="CinnaTool" />}
-            description={
-              <Space orientation="vertical" size={2}>
-                <Typography.Title className="chat-welcome-title" level={2}>
-                  {greeting}
-                </Typography.Title>
-              </Space>
-            }
-          />
+          <div className="chat-welcome-content">
+            <img className="chat-welcome-logo" src={logo} alt="CinnaTool" />
+            <Space className="chat-welcome-copy" orientation="vertical" size={2}>
+              <Typography.Title className="chat-welcome-title" level={2}>
+                {greeting}
+              </Typography.Title>
+            </Space>
+          </div>
           <ChatInput {...inputProps} />
         </Space>
       </div>

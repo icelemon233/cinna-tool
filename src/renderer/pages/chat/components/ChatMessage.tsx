@@ -6,12 +6,11 @@ import {
   LikeOutlined,
   RedoOutlined,
   RobotOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from '@/shared/i18n';
 import { useChatStore, type Message } from '@/shared/store/chatStore';
-import { useUserStore } from '@/shared/store/userStore';
-import UserAvatar from '@/shared/components/user-avatar/UserAvatar';
 import './ChatMessage.css';
 
 interface ChatMessageProps {
@@ -29,7 +28,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isGenerating }) => {
   const isUser = message.role === 'user';
   const showTyping = !isUser && isGenerating && !message.content;
   const { t } = useTranslation();
-  const { username, avatar } = useUserStore();
 
   const handleCopy = async () => {
     try {
@@ -48,7 +46,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isGenerating }) => {
   return (
     <div className={`chat-message ${roleClassName}`}>
       {isUser ? (
-        <UserAvatar avatar={avatar} className="chat-message-avatar" username={username} />
+        <Avatar className="chat-message-avatar" icon={<UserOutlined />} />
       ) : (
         <Avatar className="chat-message-avatar" icon={<RobotOutlined />} />
       )}

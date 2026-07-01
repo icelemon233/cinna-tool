@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { App, Typography } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/shared/i18n';
@@ -8,13 +8,15 @@ import { SearchResultsPanel } from './components/SearchResultsPanel';
 import { SearchStatusBar } from './components/SearchStatusBar';
 import { useTextSearchWorker } from './hooks/useTextSearchWorker';
 import { useVirtualRows } from './hooks/useVirtualRows';
+import type { QuickSearchDropRequest } from './types';
 import './index.css';
 
 interface QuickSearchProps {
   active: boolean;
+  droppedFile?: QuickSearchDropRequest | null;
 }
 
-const QuickSearch: React.FC<QuickSearchProps> = ({ active }) => {
+const QuickSearch: React.FC<QuickSearchProps> = ({ active, droppedFile }) => {
   const [file, setFile] = useState<File | null>(null);
   const [query, setQuery] = useState('');
   const [caseSensitive, setCaseSensitive] = useState(false);
@@ -23,6 +25,7 @@ const QuickSearch: React.FC<QuickSearchProps> = ({ active }) => {
   const [viewportHeight, setViewportHeight] = useState(420);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const handledDroppedFileIdRef = useRef<number | null>(null);
   const { message } = App.useApp();
   const { t } = useTranslation();
   const search = useTextSearchWorker(file, query, caseSensitive);
@@ -44,14 +47,22 @@ const QuickSearch: React.FC<QuickSearchProps> = ({ active }) => {
     scrollerRef.current?.scrollTo({ top: 0 });
   }, [active, search.debouncedQuery, file]);
 
-  const selectFile = (selected: File | undefined) => {
+  const selectFile = useCallback((selected: File | undefined) => {
     if (!selected) return;
     search.resetSearch();
     setFile(selected);
     setQuery('');
     setScrollTop(0);
     message.success(t('quickSearch.fileLoaded'));
-  };
+  }, [message, search, t]);
+
+  useEffect(() => {
+    if (!droppedFile || handledDroppedFileIdRef.current === droppedFile.id) return;
+
+    handledDroppedFileIdRef.current = droppedFile.id;
+    setDragging(false);
+    selectFile(droppedFile.file);
+  }, [droppedFile, selectFile]);
 
   const clearSearch = () => {
     search.resetSearch();

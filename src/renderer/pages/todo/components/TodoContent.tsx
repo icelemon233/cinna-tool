@@ -48,10 +48,26 @@ function getEmptyContent(view: ViewType, t: (key: string) => string) {
   }
 }
 
-function formatDate(t: (key: string) => string): string {
-  const now = new Date();
+function getDateFromKey(dateKey: string): Date {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  if (year && month && day) {
+    return new Date(year, month - 1, day);
+  }
+  return new Date();
+}
+
+function formatDate(t: (key: string) => string, dateKey: string): string {
+  const now = getDateFromKey(dateKey);
   const weekdays = t('todo.weekdays').split(',');
   return `${now.getMonth() + 1}/${now.getDate()}, ${weekdays[now.getDay()]}`;
+}
+
+function normalizeSearchQuery(value: unknown): string {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function normalizeTodoTitle(value: unknown): string {
+  return String(value ?? '').trim().toLowerCase();
 }
 
 const TodoContent: React.FC = () => {
@@ -60,20 +76,51 @@ const TodoContent: React.FC = () => {
   const currentView = useTodoStore((state) => state.currentView);
   const currentListId = useTodoStore((state) => state.currentListId);
   const searchQuery = useTodoStore((state) => state.searchQuery);
+  const todayKey = useTodoStore((state) => state.todayKey);
 
   const { t } = useTranslation();
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const searchResult = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = normalizeSearchQuery(searchQuery);
     if (!q) return null;
 
-    const matched = todos.filter((todo) => todo.title.toLowerCase().includes(q));
+    const matched = todos.filter((todo) => normalizeTodoTitle(todo.title).includes(q));
     return {
       activeMatched: matched.filter((todo) => !todo.completed),
       completedMatched: matched.filter((todo) => todo.completed),
       matched,
     };
   }, [searchQuery, todos]);
+
+  const filteredTodos = useMemo(() => {
+    switch (currentView) {
+      case 'my-day':
+        return todos.filter((todo) => todo.myDay);
+      case 'important':
+        return todos.filter((todo) => todo.important);
+      case 'planned':
+        return todos
+          .filter((todo) => todo.dueDate !== undefined)
+          .sort((a, b) => (a.dueDate ?? 0) - (b.dueDate ?? 0));
+      case 'tasks':
+        return todos;
+      case 'list':
+        return todos.filter((todo) => todo.listId === currentListId);
+      default:
+        return todos;
+    }
+  }, [currentListId, currentView, todos]);
+  const { activeTodos, completedTodos } = useMemo(() => ({
+    activeTodos: filteredTodos.filter((todo) => !todo.completed),
+    completedTodos: filteredTodos.filter((todo) => todo.completed),
+  }), [filteredTodos]);
+
+  const currentList = useMemo(
+    () => lists.find((list) => list.id === currentListId),
+    [currentListId, lists]
+  );
+  const { icon, title } = getViewTitle(currentView, t, currentList?.name);
+  const emptyContent = getEmptyContent(currentView, t);
 
   if (searchResult) {
     const { activeMatched, completedMatched, matched } = searchResult;
@@ -135,36 +182,6 @@ const TodoContent: React.FC = () => {
     );
   }
 
-  const filteredTodos = useMemo(() => {
-    switch (currentView) {
-      case 'my-day':
-        return todos.filter((todo) => todo.myDay);
-      case 'important':
-        return todos.filter((todo) => todo.important);
-      case 'planned':
-        return todos
-          .filter((todo) => todo.dueDate !== undefined)
-          .sort((a, b) => (a.dueDate ?? 0) - (b.dueDate ?? 0));
-      case 'tasks':
-        return todos;
-      case 'list':
-        return todos.filter((todo) => todo.listId === currentListId);
-      default:
-        return todos;
-    }
-  }, [currentListId, currentView, todos]);
-  const { activeTodos, completedTodos } = useMemo(() => ({
-    activeTodos: filteredTodos.filter((todo) => !todo.completed),
-    completedTodos: filteredTodos.filter((todo) => todo.completed),
-  }), [filteredTodos]);
-
-  const currentList = useMemo(
-    () => lists.find((list) => list.id === currentListId),
-    [currentListId, lists]
-  );
-  const { icon, title } = getViewTitle(currentView, t, currentList?.name);
-  const emptyContent = getEmptyContent(currentView, t);
-
   return (
     <section className="todo-content">
       <header className="todo-content-header">
@@ -175,7 +192,7 @@ const TodoContent: React.FC = () => {
           </Space>
         </Typography.Title>
         {currentView === 'my-day' && (
-          <Typography.Text type="secondary">{formatDate(t)}</Typography.Text>
+          <Typography.Text type="secondary">{formatDate(t, todayKey)}</Typography.Text>
         )}
       </header>
 

@@ -121,15 +121,6 @@
   grid-template-columns: minmax(260px, 1fr) minmax(360px, max-content);
 }
 
-.settings-row--user-profile {
-  align-items: start;
-  grid-template-columns: minmax(280px, 1fr) minmax(320px, 420px);
-}
-
-.settings-row--user-stats {
-  grid-template-columns: minmax(260px, 1fr) minmax(360px, 420px);
-}
-
 .settings-row-main {
   min-width: 220px;
 }
@@ -168,11 +159,6 @@
 .settings-row--app-info .settings-row-control {
   width: auto;
   justify-self: end;
-}
-
-.settings-row--user-profile .settings-row-control,
-.settings-row--user-stats .settings-row-control {
-  width: 100%;
 }
 
 .settings-row-control .ant-select,
@@ -251,113 +237,6 @@
   line-height: 1.4 !important;
 }
 
-.settings-user-login {
-  display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(300px, 420px);
-  align-items: center;
-  gap: 20px;
-}
-
-.settings-user-login-main,
-.settings-user-identity {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.settings-user-identity {
-  margin-top: 16px;
-}
-
-.settings-user-avatar {
-  flex: 0 0 auto;
-  background: var(--accent);
-}
-
-.settings-user-avatar .ant-avatar-img {
-  object-fit: cover;
-}
-
-.settings-user-identity-text {
-  min-width: 0;
-  display: grid;
-  gap: 3px;
-}
-
-.settings-user-identity-text .ant-typography {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.settings-user-form {
-  display: grid;
-  gap: 10px;
-}
-
-.settings-avatar-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-}
-
-.settings-avatar-actions .ant-upload,
-.settings-avatar-actions .ant-btn:first-child {
-  width: 100%;
-}
-
-.settings-user-form .ant-input-affix-wrapper,
-.settings-user-form .ant-btn {
-  min-height: 42px;
-  border-radius: 8px;
-}
-
-.settings-user-save-button {
-  width: 132px;
-  justify-self: end;
-}
-
-.settings-user-stats {
-  display: grid;
-  gap: 12px;
-}
-
-.settings-user-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.settings-user-stat {
-  min-width: 0;
-  display: grid;
-  gap: 5px;
-  padding: 10px 12px;
-  border: 1px solid var(--shell-border);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--shell-main-bg) 76%, var(--bg-card));
-}
-
-.settings-user-stat .ant-typography {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.settings-user-stat strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--text-primary);
-  font-size: 18px;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (max-width: 799px) {
   .settings-page {
     min-width: 560px;
@@ -400,10 +279,7 @@
   }
 
   .settings-row,
-  .settings-row--app-info,
-  .settings-row--user-profile,
-  .settings-row--user-stats,
-  .settings-user-login {
+  .settings-row--app-info {
     align-items: flex-start;
     grid-template-columns: 1fr;
     gap: 12px;
@@ -414,24 +290,5 @@
   .settings-row-control--switch {
     width: 100%;
     justify-self: stretch;
-  }
-
-  .settings-user-save-button {
-    width: 100%;
-    justify-self: stretch;
-  }
-
-  .settings-avatar-actions {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 520px) {
-  .settings-button-row {
-    grid-template-columns: 1fr;
-  }
-
-  .settings-user-stat-grid {
-    grid-template-columns: 1fr;
   }
 }

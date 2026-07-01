@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { App, Button, Input, Typography } from 'antd';
 import {
   ArrowDownOutlined,
@@ -17,13 +17,18 @@ import './index.css';
 
 interface QuickReaderProps {
   active: boolean;
+  openRequest?: {
+    id: number;
+    reader: typeof emptyReader;
+  } | null;
   onActivate: () => void;
 }
 
-const QuickReader: React.FC<QuickReaderProps> = ({ active, onActivate }) => {
+const QuickReader: React.FC<QuickReaderProps> = ({ active, openRequest, onActivate }) => {
   const [reader, setReader] = useState(emptyReader);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearchIndex, setActiveSearchIndex] = useState(0);
+  const handledOpenRequestIdRef = useRef(0);
   const { message } = App.useApp();
   const { t } = useTranslation();
   const searchMatchCount = useMemo(
@@ -38,6 +43,16 @@ const QuickReader: React.FC<QuickReaderProps> = ({ active, onActivate }) => {
     setReader,
     t,
   });
+
+  useEffect(() => {
+    if (!openRequest || handledOpenRequestIdRef.current === openRequest.id) return;
+
+    handledOpenRequestIdRef.current = openRequest.id;
+    setReader(openRequest.reader);
+    setSearchQuery('');
+    setActiveSearchIndex(0);
+    onActivate();
+  }, [onActivate, openRequest]);
 
   useEffect(() => {
     setActiveSearchIndex(0);

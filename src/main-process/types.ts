@@ -95,6 +95,7 @@ export interface HomeSummaryState {
 
 export interface HomeDashboardOptions {
   aiSummaryEnabled?: boolean;
+  forceRefresh?: boolean;
 }
 
 export type ClaudeCodePermissionMode =

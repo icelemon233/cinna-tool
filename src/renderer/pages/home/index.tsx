@@ -47,6 +47,35 @@ interface HomePageProps {
   active: boolean;
 }
 
+const HOME_DASHBOARD_CACHE_PREFIX = 'cinnatool-home-dashboard:';
+const HOME_DASHBOARD_CACHE_MAX_AGE_MS = 10 * 60 * 1000;
+
+function getDashboardCacheKey(locale: 'zh' | 'en', period: TrendPeriod): string {
+  return `${locale}:${period}`;
+}
+
+function readCachedDashboard(cacheKey: string): HomeDashboardData | null {
+  try {
+    const raw = localStorage.getItem(`${HOME_DASHBOARD_CACHE_PREFIX}${cacheKey}`);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as HomeDashboardData;
+    if (!parsed || typeof parsed.fetchedAt !== 'number') return null;
+    if (Date.now() - parsed.fetchedAt > HOME_DASHBOARD_CACHE_MAX_AGE_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedDashboard(cacheKey: string, data: HomeDashboardData): void {
+  try {
+    localStorage.setItem(`${HOME_DASHBOARD_CACHE_PREFIX}${cacheKey}`, JSON.stringify(data));
+  } catch {
+    // Dashboard cache is only a startup accelerator.
+  }
+}
+
 function formatDate(value: string, locale: 'zh' | 'en'): string {
   const timestamp = Date.parse(value);
   if (Number.isNaN(timestamp)) return value;
@@ -95,10 +124,11 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
   );
 
   const loadData = useCallback(async ({ forceRefresh = false }: LoadDataOptions = {}) => {
-    const cacheKey = `${locale}:${period}`;
-    const cachedData = dashboardCacheRef.current.get(cacheKey);
+    const cacheKey = getDashboardCacheKey(locale, period);
+    const cachedData = dashboardCacheRef.current.get(cacheKey) ?? readCachedDashboard(cacheKey);
 
     if (!forceRefresh && cachedData) {
+      dashboardCacheRef.current.set(cacheKey, cachedData);
       setData(cachedData);
       setError('');
       setLoading(false);
@@ -129,10 +159,11 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
         return;
       }
 
-      const nextData = await window.electronAPI.fetchHomeDashboard(locale, period);
+      const nextData = await window.electronAPI.fetchHomeDashboard(locale, period, { forceRefresh });
       if (loadId !== latestLoadIdRef.current) return;
 
       dashboardCacheRef.current.set(cacheKey, nextData);
+      writeCachedDashboard(cacheKey, nextData);
       setData(nextData);
     } catch {
       if (loadId === latestLoadIdRef.current) {
@@ -147,7 +178,8 @@ const HomePage: React.FC<HomePageProps> = ({ active }) => {
 
   useEffect(() => {
     if (!active) return;
-    loadData();
+
+    void loadData();
   }, [active, loadData]);
 
   const handleDashboardRefresh = async () => {

@@ -77,6 +77,18 @@ export interface HomeSummaryState {
 
 export interface HomeDashboardOptions {
   aiSummaryEnabled?: boolean;
+  forceRefresh?: boolean;
+}
+
+export interface SaveGeneratedDocumentRequest {
+  content: string;
+  fileName?: string;
+  extension?: 'md' | 'txt';
+}
+
+export interface SaveGeneratedDocumentResult {
+  fileName: string;
+  path: string;
 }
 
 export type ClaudeCodePermissionMode =
@@ -179,6 +191,7 @@ export interface ElectronAPI {
   getModels: () => Promise<ModelInfo[]>;
 
   // App shell
+  notifyShellReady: () => void;
   setAppLocale: (locale: 'zh' | 'en') => Promise<boolean>;
   writeClipboardText: (text: string) => Promise<boolean>;
   openExternalUrl: (url: string) => Promise<boolean>;
@@ -188,6 +201,7 @@ export interface ElectronAPI {
     options?: HomeDashboardOptions
   ) => Promise<HomeDashboardData>;
   selectDownloadFolder: () => Promise<string | null>;
+  saveGeneratedDocument: (request: SaveGeneratedDocumentRequest) => Promise<SaveGeneratedDocumentResult>;
   selectWallpaperFile: (kind: 'static' | 'dynamic') => Promise<WallpaperFileInfo | null>;
   resolveWallpaperFile: (path: string, kind: 'static' | 'dynamic') => Promise<WallpaperFileInfo | null>;
 

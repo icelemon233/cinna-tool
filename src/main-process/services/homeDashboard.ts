@@ -17,6 +17,8 @@ const AI_NEWS_LIMIT = 20;
 const AI_SUMMARY_NEWS_LIMIT = 8;
 const AI_SUMMARY_REPO_LIMIT = 6;
 const AI_SUMMARY_TIMEOUT_MS = 30_000;
+const HOME_DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
+const HOME_FEED_TIMEOUT_MS = 8_000;
 
 interface NewsFeedSource {
   name: string;
@@ -183,6 +185,14 @@ type AiSummaryError = Error & {
   reason?: HomeSummaryReason;
 };
 
+interface DashboardCacheEntry {
+  data: HomeDashboardData;
+  expiresAt: number;
+}
+
+const dashboardCache = new Map<string, DashboardCacheEntry>();
+const pendingDashboardRequests = new Map<string, Promise<HomeDashboardData>>();
+
 const TEXT_DECODER_ENTITIES: Record<string, string> = {
   amp: '&',
   lt: '<',
@@ -257,18 +267,26 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function fetchText(url: string): Promise<string> {
-  const response = await net.fetch(url, {
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0 Safari/537.36 CinnaTool/1.0',
-      Accept: 'text/html,application/xhtml+xml,text/plain,*/*',
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
+async function fetchText(url: string, timeoutMs = HOME_FEED_TIMEOUT_MS): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await net.fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0 Safari/537.36 CinnaTool/1.0',
+        Accept: 'text/html,application/xhtml+xml,text/plain,*/*',
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    return response.text();
+  } finally {
+    clearTimeout(timeout);
   }
-  return response.text();
 }
 
 function normalizeNewsUrl(url: string): string {
@@ -687,7 +705,7 @@ async function generateAiSummary(
   return summary.replace(/\s+/g, ' ').trim();
 }
 
-export async function fetchHomeDashboard(
+async function fetchHomeDashboardFresh(
   locale: AppLocale,
   period: TrendingPeriod,
   options: HomeDashboardOptions = {}
@@ -743,4 +761,37 @@ export async function fetchHomeDashboard(
     summaryState,
     fetchedAt: Date.now(),
   };
+}
+
+export async function fetchHomeDashboard(
+  locale: AppLocale,
+  period: TrendingPeriod,
+  options: HomeDashboardOptions = {}
+): Promise<HomeDashboardData> {
+  const cacheKey = `${locale}:${period}:${options.aiSummaryEnabled ? 'ai' : 'plain'}`;
+  const cached = dashboardCache.get(cacheKey);
+
+  if (!options.forceRefresh && cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
+  const pending = pendingDashboardRequests.get(cacheKey);
+  if (!options.forceRefresh && pending) {
+    return pending;
+  }
+
+  const request = fetchHomeDashboardFresh(locale, period, options)
+    .then((data) => {
+      dashboardCache.set(cacheKey, {
+        data,
+        expiresAt: Date.now() + HOME_DASHBOARD_CACHE_TTL_MS,
+      });
+      return data;
+    })
+    .finally(() => {
+      pendingDashboardRequests.delete(cacheKey);
+    });
+
+  pendingDashboardRequests.set(cacheKey, request);
+  return request;
 }

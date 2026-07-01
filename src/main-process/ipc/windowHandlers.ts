@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import type { IpcContext } from '../types';
+import { revealMainWindow } from '../windows/mainWindow';
 
 export function registerWindowHandlers({
   getMainWindow,
@@ -29,11 +30,7 @@ export function registerWindowHandlers({
 
     setMainWindowLocked(false);
     mainWindow.setSkipTaskbar(false);
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore();
-    }
-    mainWindow.show();
-    mainWindow.focus();
+    revealMainWindow(mainWindow);
     mainWindow.webContents.send('clipboard:show-main');
   };
 

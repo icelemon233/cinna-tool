@@ -3,6 +3,11 @@ export interface SearchResult {
   text: string;
 }
 
+export interface QuickSearchDropRequest {
+  id: number;
+  file: File;
+}
+
 export interface SearchDone {
   bytesRead: number;
   lineCount: number;

@@ -43,10 +43,6 @@
     -webkit-app-region: no-drag;
   }
 
-  .topbar-user-button {
-    position: relative;
-  }
-
   .topbar-action-button {
     width: 42px;
     height: 42px;
@@ -69,14 +65,6 @@
 
   .topbar-action-button:active {
     transform: translateY(0);
-  }
-
-  .topbar-avatar {
-    background: var(--accent);
-  }
-
-  .topbar-avatar .ant-avatar-img {
-    object-fit: cover;
   }
 
   @media (max-width: 799px) {

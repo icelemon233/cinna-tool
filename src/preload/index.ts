@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getModels: () => ipcRenderer.invoke('get-models'),
 
   // App shell
+  notifyShellReady: () => ipcRenderer.send('app:shell-ready'),
   setAppLocale: (locale: 'zh' | 'en') => ipcRenderer.invoke('app:set-locale', locale),
   writeClipboardText: (text: string) => ipcRenderer.invoke('clipboard:write-text', text),
   openExternalUrl: (url: string) => ipcRenderer.invoke('app:open-external', url),
@@ -34,6 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     options?: unknown
   ) => ipcRenderer.invoke('home:fetch', locale, period, options),
   selectDownloadFolder: () => ipcRenderer.invoke('downloads:select-folder'),
+  saveGeneratedDocument: (request: unknown) => ipcRenderer.invoke('documents:save-generated', request),
   selectWallpaperFile: (kind: 'static' | 'dynamic') => ipcRenderer.invoke('wallpaper:select-file', kind),
   resolveWallpaperFile: (path: string, kind: 'static' | 'dynamic') =>
     ipcRenderer.invoke('wallpaper:resolve-file', path, kind),

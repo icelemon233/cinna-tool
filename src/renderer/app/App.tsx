@@ -1,12 +1,15 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { App as AntdApp, ConfigProvider, Menu, Spin } from 'antd';
+import React, { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { App as AntdApp, Button, ConfigProvider, Menu, Modal, Spin } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
 import {
+  BarChartOutlined,
   CalendarOutlined,
   CheckSquareOutlined,
   CopyOutlined,
+  DiffOutlined,
   FileSearchOutlined,
+  FileTextOutlined,
   HomeOutlined,
   MessageOutlined,
   PictureOutlined,
@@ -14,25 +17,109 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import TopBar from '@/shared/components/top-bar/TopBar';
-import QuickReader from '@/pages/quick-reader';
-import ImageViewer from '@/pages/image-viewer';
 import HomePage from '@/pages/home';
 import type { SectionId } from '@/pages/settings/types';
+import { isQuickSearchDropFile } from '@/pages/quick-search/constants';
+import type { QuickSearchDropRequest } from '@/pages/quick-search/types';
+import type { ReaderState } from '@/pages/quick-reader/types';
 import { useSettingsStore } from '@/shared/store/settingsStore';
+import { useTodoStore } from '@/shared/store/todoStore';
 import { useTranslation } from '@/shared/i18n';
 import { getAntdTheme } from './theme';
 import './index.css';
 
-type Page = 'home' | 'todo' | 'schedule' | 'clipboard' | 'chat' | 'reader' | 'search' | 'images' | 'settings';
+type Page = 'home' | 'todo' | 'schedule' | 'clipboard' | 'chat' | 'documentGen' | 'reader' | 'search' | 'codeDiff' | 'logAnalysis' | 'images' | 'settings';
 
 const ChatPage = lazy(() => import('@/pages/chat'));
+const CodeDiffPage = lazy(() => import('@/pages/code-diff'));
 const ClipboardPage = lazy(() => import('@/pages/clipboard'));
+const DocumentGeneratorPage = lazy(() => import('@/pages/document-generator'));
+const ImageViewer = lazy(() => import('@/pages/image-viewer'));
+const LogAnalysisPage = lazy(() => import('@/pages/log-analysis'));
+const QuickReader = lazy(() => import('@/pages/quick-reader'));
 const QuickSearch = lazy(() => import('@/pages/quick-search'));
 const SchedulePage = lazy(() => import('@/pages/schedule'));
 const SettingsPage = lazy(() => import('@/pages/settings'));
 const TodoPage = lazy(() => import('@/pages/todo'));
 const isClipboardFloatingWindow =
   new URLSearchParams(window.location.search).get('window') === 'clipboard-floating';
+
+function isLogAnalysisDropFile(file: File): boolean {
+  return file.name.toLowerCase().endsWith('.log');
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return Boolean(target.closest('input, textarea, [contenteditable="true"], .ant-input'));
+}
+
+function getFileExtension(file: File): string {
+  const name = file.name.toLowerCase();
+  if (name === 'dockerfile') return '.dockerfile';
+  const dotIndex = name.lastIndexOf('.');
+  return dotIndex === -1 ? '' : name.slice(dotIndex);
+}
+
+function isSupportedReaderFile(file: File): boolean {
+  const textExtensions = new Set([
+    '.txt',
+    '.text',
+    '.log',
+    '.out',
+    '.err',
+    '.csv',
+    '.tsv',
+    '.json',
+    '.md',
+    '.markdown',
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
+    '.css',
+    '.scss',
+    '.less',
+    '.html',
+    '.htm',
+    '.xml',
+    '.yaml',
+    '.yml',
+    '.toml',
+    '.ini',
+    '.conf',
+    '.config',
+    '.env',
+    '.py',
+    '.java',
+    '.go',
+    '.rs',
+    '.c',
+    '.cc',
+    '.cpp',
+    '.h',
+    '.hpp',
+    '.cs',
+    '.php',
+    '.rb',
+    '.swift',
+    '.kt',
+    '.kts',
+    '.sql',
+    '.sh',
+    '.bash',
+    '.zsh',
+    '.fish',
+    '.ps1',
+    '.bat',
+    '.dockerfile',
+  ]);
+
+  return file.type.startsWith('text/') || textExtensions.has(getFileExtension(file));
+}
+
+function isJsonFileName(file: File): boolean {
+  return getFileExtension(file) === '.json';
+}
 
 function toCssUrl(url?: string): string | undefined {
   if (!url) return undefined;
@@ -47,10 +134,39 @@ function PageFallback() {
   );
 }
 
+function navLabel(label: string, count = 0) {
+  const countText = count > 99 ? '99+' : String(count);
+
+  return (
+    <span className="app-nav-label">
+      <span className="app-nav-label-text">{label}</span>
+      {count > 0 && (
+        <span className="app-nav-label-count">{countText}</span>
+      )}
+    </span>
+  );
+}
+
+function getMsUntilNextLocalDay(): number {
+  const nextDay = new Date();
+  nextDay.setHours(24, 0, 1, 0);
+  return Math.max(nextDay.getTime() - Date.now(), 1000);
+}
+
+interface QuickReaderOpenRequest {
+  id: number;
+  reader: ReaderState;
+}
+
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
   const [settingsSection, setSettingsSection] = useState<SectionId>('appearance');
   const [mountedPages, setMountedPages] = useState<Set<Page>>(() => new Set(['home']));
+  const [quickSearchDrop, setQuickSearchDrop] = useState<QuickSearchDropRequest | null>(null);
+  const [quickReaderOpen, setQuickReaderOpen] = useState<QuickReaderOpenRequest | null>(null);
+  const [logAnalysisDrop, setLogAnalysisDrop] = useState<QuickSearchDropRequest | null>(null);
+  const [pendingTextDrop, setPendingTextDrop] = useState<QuickSearchDropRequest | null>(null);
+  const dropRequestIdRef = useRef(0);
   const {
     theme,
     language,
@@ -60,7 +176,34 @@ const App: React.FC = () => {
     dynamicWallpaperFile,
     setDynamicWallpaperFile,
   } = useSettingsStore();
+  const pendingTodoCount = useTodoStore((state) => (
+    Array.isArray(state.todos) ? state.todos.filter((todo) => !todo.completed).length : 0
+  ));
+  const refreshMyDay = useTodoStore((state) => state.refreshMyDay);
   const { t } = useTranslation();
+
+  const openReader = (reader: ReaderState) => {
+    setQuickReaderOpen({
+      id: dropRequestIdRef.current += 1,
+      reader,
+    });
+    setPage('reader');
+  };
+
+  const openReaderFile = async (file: File) => {
+    try {
+      const { readReaderFile } = await import('@/pages/quick-reader/utils/fileSupport');
+      openReader(await readReaderFile(file));
+    } catch {
+      if (isJsonFileName(file)) {
+        return;
+      }
+    }
+  };
+
+  useLayoutEffect(() => {
+    window.electronAPI?.notifyShellReady?.();
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -72,10 +215,117 @@ const App: React.FC = () => {
   }, [language]);
 
   useEffect(() => {
+    let timerId: number | undefined;
+
+    const scheduleNextRefresh = () => {
+      window.clearTimeout(timerId);
+      timerId = window.setTimeout(() => {
+        refreshMyDay();
+        scheduleNextRefresh();
+      }, getMsUntilNextLocalDay());
+    };
+
+    const refreshWhenVisible = () => {
+      if (!document.hidden) {
+        refreshMyDay();
+      }
+    };
+
+    refreshMyDay();
+    scheduleNextRefresh();
+    window.addEventListener('focus', refreshMyDay);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+
+    return () => {
+      window.clearTimeout(timerId);
+      window.removeEventListener('focus', refreshMyDay);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, [refreshMyDay]);
+
+  useEffect(() => {
     return window.electronAPI?.onShowClipboardPage?.(() => {
       setPage('clipboard');
     });
   }, []);
+
+  useEffect(() => {
+    if (isClipboardFloatingWindow) return undefined;
+
+    const hasDroppedFiles = (event: DragEvent) => (
+      Array.from(event.dataTransfer?.types ?? []).includes('Files')
+    );
+
+    const handleDragOver = (event: DragEvent) => {
+      if (!hasDroppedFiles(event)) return;
+
+      event.preventDefault();
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy';
+      }
+    };
+
+    const handlePaste = (event: ClipboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+
+      const text = event.clipboardData?.getData('text/plain') ?? '';
+      if (!text.trim()) return;
+
+      void import('@/pages/quick-reader/utils/fileSupport')
+        .then(({ createReaderFromPastedText }) => {
+          const reader = createReaderFromPastedText(text, t);
+          if (!reader) return;
+          event.preventDefault();
+          openReader(reader);
+        })
+        .catch(() => {
+          event.preventDefault();
+        });
+    };
+
+    const handleDrop = (event: DragEvent) => {
+      if (!hasDroppedFiles(event)) return;
+
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[data-log-analysis-drop-zone="true"], [data-code-diff-drop-zone="true"]')
+      ) {
+        return;
+      }
+
+      const files = Array.from(event.dataTransfer?.files ?? []);
+      const file = files.find(isQuickSearchDropFile);
+      if (!file) {
+        const readerFile = files.find(isSupportedReaderFile);
+        if (readerFile) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          void openReaderFile(readerFile);
+          return;
+        }
+
+        event.preventDefault();
+        return;
+      }
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setPendingTextDrop({
+        id: dropRequestIdRef.current += 1,
+        file,
+      });
+    };
+
+    document.addEventListener('paste', handlePaste);
+    window.addEventListener('dragover', handleDragOver, true);
+    window.addEventListener('drop', handleDrop, true);
+
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+      window.removeEventListener('dragover', handleDragOver, true);
+      window.removeEventListener('drop', handleDrop, true);
+    };
+  }, [t]);
 
   useEffect(() => {
     setMountedPages((current) => {
@@ -148,6 +398,27 @@ const App: React.FC = () => {
     }
     setPage('settings');
   };
+  const openPendingTextDropInReader = () => {
+    if (!pendingTextDrop) return;
+
+    void openReaderFile(pendingTextDrop.file);
+    setPendingTextDrop(null);
+  };
+  const openPendingTextDropInSearch = () => {
+    if (!pendingTextDrop) return;
+
+    setQuickSearchDrop(pendingTextDrop);
+    setPendingTextDrop(null);
+    setPage('search');
+  };
+  const openPendingTextDropInLogAnalysis = () => {
+    if (!pendingTextDrop || !isLogAnalysisDropFile(pendingTextDrop.file)) return;
+
+    setLogAnalysisDrop(pendingTextDrop);
+    setPendingTextDrop(null);
+    setPage('logAnalysis');
+  };
+  const pendingDropIsLog = pendingTextDrop ? isLogAnalysisDropFile(pendingTextDrop.file) : false;
 
   if (isClipboardFloatingWindow) {
     return (
@@ -170,6 +441,30 @@ const App: React.FC = () => {
       theme={getAntdTheme(theme)}
     >
       <AntdApp>
+        <Modal
+          centered
+          destroyOnHidden
+          footer={[
+            <Button key="reader" onClick={openPendingTextDropInReader}>
+              {t('nav.reader')}
+            </Button>,
+            <Button key="search" onClick={openPendingTextDropInSearch}>
+              {t('nav.search')}
+            </Button>,
+            pendingDropIsLog && (
+              <Button key="logAnalysis" onClick={openPendingTextDropInLogAnalysis}>
+                {t('nav.logAnalysis')}
+              </Button>
+            ),
+          ]}
+          onCancel={() => setPendingTextDrop(null)}
+          open={Boolean(pendingTextDrop)}
+          title={t('quickSearch.dropChoiceTitle')}
+        >
+          <span>
+            {t('quickSearch.dropChoiceContent').replace('{name}', pendingTextDrop?.file.name ?? '')}
+          </span>
+        </Modal>
         <div
           className="app-shell"
           data-theme={theme}
@@ -192,7 +487,7 @@ const App: React.FC = () => {
                 {
                   key: 'todo',
                   icon: <CheckSquareOutlined />,
-                  label: t('nav.todo'),
+                  label: navLabel(t('nav.todo'), pendingTodoCount),
                 },
                 {
                   key: 'schedule',
@@ -210,6 +505,11 @@ const App: React.FC = () => {
                   label: t('nav.chat'),
                 },
                 {
+                  key: 'documentGen',
+                  icon: <FileTextOutlined />,
+                  label: t('nav.documentGen'),
+                },
+                {
                   key: 'reader',
                   icon: <FileSearchOutlined />,
                   label: t('nav.reader'),
@@ -218,6 +518,16 @@ const App: React.FC = () => {
                   key: 'search',
                   icon: <SearchOutlined />,
                   label: t('nav.search'),
+                },
+                {
+                  key: 'codeDiff',
+                  icon: <DiffOutlined />,
+                  label: t('nav.codeDiff'),
+                },
+                {
+                  key: 'logAnalysis',
+                  icon: <BarChartOutlined />,
+                  label: t('nav.logAnalysis'),
                 },
                 {
                   key: 'images',
@@ -267,8 +577,8 @@ const App: React.FC = () => {
             />
             <main className="app-content-area">
               <div className="app-page-wrapper">
-                {isPageMounted('home') && <HomePage active={page === 'home'} />}
                 <Suspense fallback={<PageFallback />}>
+                  {isPageMounted('home') && <HomePage active={page === 'home'} />}
                   <div className={`app-page-slot${page === 'todo' ? ' is-active' : ''}`}>
                     {isPageMounted('todo') && <TodoPage />}
                   </div>
@@ -279,13 +589,39 @@ const App: React.FC = () => {
                   <div className={`app-page-slot${page === 'chat' ? ' is-active' : ''}`}>
                     {isPageMounted('chat') && <ChatPage />}
                   </div>
-                  <QuickReader
-                    active={page === 'reader'}
-                    onActivate={() => setPage('reader')}
-                  />
-                  {isPageMounted('search') && <QuickSearch active={page === 'search'} />}
+                  <div className={`app-page-slot${page === 'documentGen' ? ' is-active' : ''}`}>
+                    {isPageMounted('documentGen') && (
+                      <DocumentGeneratorPage active={page === 'documentGen'} />
+                    )}
+                  </div>
+                  {isPageMounted('reader') && (
+                    <QuickReader
+                      active={page === 'reader'}
+                      openRequest={quickReaderOpen}
+                      onActivate={() => setPage('reader')}
+                    />
+                  )}
+                  {isPageMounted('search') && (
+                    <QuickSearch
+                      active={page === 'search'}
+                      droppedFile={quickSearchDrop}
+                    />
+                  )}
+                  {isPageMounted('codeDiff') && (
+                    <CodeDiffPage active={page === 'codeDiff'} />
+                  )}
+                  <div className={`app-page-slot${page === 'logAnalysis' ? ' is-active' : ''}`}>
+                    {isPageMounted('logAnalysis') && (
+                      <LogAnalysisPage
+                        active={page === 'logAnalysis'}
+                        droppedFile={logAnalysisDrop}
+                      />
+                    )}
+                  </div>
+                  {isPageMounted('images') && (
+                    <ImageViewer active={page === 'images'} onActivate={() => setPage('images')} />
+                  )}
                 </Suspense>
-                <ImageViewer active={page === 'images'} onActivate={() => setPage('images')} />
                 <div className={`app-page-slot${page === 'settings' ? ' is-active' : ''}`}>
                   <Suspense fallback={<PageFallback />}>
                     {isPageMounted('settings') && (

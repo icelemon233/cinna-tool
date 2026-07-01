@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useChatStore } from '@/shared/store/chatStore';
-import { useUserStore } from '@/shared/store/userStore';
 import { useTranslation } from '@/shared/i18n';
 import ChatSettingsPanel from './components/ChatSettings';
 import ChatSkillsPanel from './components/ChatSkillsPanel';
@@ -43,7 +42,6 @@ const ChatPage: React.FC = () => {
   } = useChatStore();
 
   const { t } = useTranslation();
-  const { isLoggedIn, username } = useUserStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,8 +67,7 @@ const ChatPage: React.FC = () => {
   );
 
   const conversationTokenCount = estimateTokenCount(currentMessages);
-  const greetingName = isLoggedIn && username.trim() ? username : t('chat.guestName');
-  const greeting = t(getGreetingKey()).replace('{name}', greetingName);
+  const greeting = t(getGreetingKey()).replace('{name}', t('chat.guestName'));
   const inputProps = {
     onSend: sendMessage,
     onStop: stopGeneration,
