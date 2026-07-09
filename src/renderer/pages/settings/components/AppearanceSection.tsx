@@ -1,11 +1,13 @@
 import type React from 'react';
 import { useRef } from 'react';
-import { Button, Select, Slider, Typography } from 'antd';
+import { Button, Select, Slider, Switch, Typography } from 'antd';
 import {
   BgColorsOutlined,
   DeleteOutlined,
+  ExportOutlined,
   FolderOpenOutlined,
   GlobalOutlined,
+  HomeOutlined,
   PictureOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
@@ -14,14 +16,18 @@ import { themeOptions } from '../options';
 import type { WallpaperKind, WallpaperPickerResult } from '../types';
 
 interface AppearanceSectionProps {
+  clipboardFloatingOpacity: number;
   dynamicWallpaperFile: WallpaperFileInfo | null;
+  hideHomePage: boolean;
   language: 'zh' | 'en';
   nativeWallpaperPickerAvailable: boolean;
   onLocalWallpaperFile: (kind: WallpaperKind, file: File | undefined) => void | Promise<void>;
   onWallpaperFile: (kind: WallpaperKind) => Promise<WallpaperPickerResult>;
   setDynamicWallpaperFile: (file: WallpaperFileInfo | null) => void;
+  setHideHomePage: (hidden: boolean) => void;
   setLanguage: (language: 'zh' | 'en') => void;
   setTheme: (theme: ThemeType) => void;
+  setClipboardFloatingOpacity: (opacity: number) => void;
   setWallpaperFile: (file: WallpaperFileInfo | null) => void;
   setWallpaperOpacity: (opacity: number) => void;
   t: (key: string) => string;
@@ -31,14 +37,18 @@ interface AppearanceSectionProps {
 }
 
 export function AppearanceSection({
+  clipboardFloatingOpacity,
   dynamicWallpaperFile,
+  hideHomePage,
   language,
   nativeWallpaperPickerAvailable,
   onLocalWallpaperFile,
   onWallpaperFile,
   setDynamicWallpaperFile,
+  setHideHomePage,
   setLanguage,
   setTheme,
+  setClipboardFloatingOpacity,
   setWallpaperFile,
   setWallpaperOpacity,
   t,
@@ -141,6 +151,43 @@ export function AppearanceSection({
               value={theme}
               options={themeSelectOptions}
               onChange={setTheme}
+            />
+          </div>
+        </div>
+
+        <div className="settings-row">
+          <div className="settings-row-main">
+            <div className="settings-row-title">
+              <HomeOutlined />
+              {t('settings.hideHomePage')}
+            </div>
+            <Typography.Text className="settings-row-desc" type="secondary">
+              {t('settings.hideHomePageDesc')}
+            </Typography.Text>
+          </div>
+          <div className="settings-row-control">
+            <Switch checked={hideHomePage} onChange={setHideHomePage} />
+          </div>
+        </div>
+
+        <div className="settings-row">
+          <div className="settings-row-main">
+            <div className="settings-row-title">
+              <ExportOutlined />
+              {t('settings.clipboardFloatingOpacity')}
+            </div>
+            <Typography.Text className="settings-row-desc" type="secondary">
+              {t('settings.clipboardFloatingOpacityDesc')}
+            </Typography.Text>
+          </div>
+          <div className="settings-row-control">
+            <Slider
+              min={35}
+              max={100}
+              step={5}
+              value={Math.round(clipboardFloatingOpacity * 100)}
+              onChange={(value) => setClipboardFloatingOpacity(value / 100)}
+              tooltip={{ formatter: (value) => `${value}%` }}
             />
           </div>
         </div>

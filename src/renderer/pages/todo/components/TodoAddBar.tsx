@@ -4,8 +4,12 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useTodoStore } from '@/shared/store/todoStore';
 import { useTranslation } from '@/shared/i18n';
 
-const TodoAddBar: React.FC = () => {
-  const { currentView, currentListId, addTodo } = useTodoStore();
+interface TodoAddBarProps {
+  quickCreateKey?: number;
+}
+
+const TodoAddBar: React.FC<TodoAddBarProps> = ({ quickCreateKey = 0 }) => {
+  const addTodo = useTodoStore((state) => state.addTodo);
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
@@ -17,41 +21,17 @@ const TodoAddBar: React.FC = () => {
     }
   }, [editing]);
 
+  useEffect(() => {
+    if (quickCreateKey <= 0) return;
+    setEditing(true);
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  }, [quickCreateKey]);
+
   const handleSubmit = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    const options: {
-      myDay?: boolean;
-      important?: boolean;
-      dueDate?: number;
-      listId?: string;
-    } = {};
-
-    switch (currentView) {
-      case 'my-day':
-        options.myDay = true;
-        break;
-      case 'important':
-        options.important = true;
-        break;
-      case 'planned': {
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        options.dueDate = today.getTime();
-        break;
-      }
-      case 'list':
-        if (currentListId) {
-          options.listId = currentListId;
-        }
-        break;
-      case 'tasks':
-      default:
-        break;
-    }
-
-    addTodo(trimmed, options);
+    addTodo(trimmed);
     setText('');
   };
 
@@ -62,21 +42,6 @@ const TodoAddBar: React.FC = () => {
     if (event.key === 'Escape') {
       setEditing(false);
       setText('');
-    }
-  };
-
-  const getPlaceholder = (): string => {
-    switch (currentView) {
-      case 'my-day':
-        return t('todo.addToMyDay.placeholder');
-      case 'important':
-        return t('todo.addImportant.placeholder');
-      case 'planned':
-        return t('todo.addPlanned.placeholder');
-      case 'list':
-        return t('todo.addToList.placeholder');
-      default:
-        return t('todo.addDefault.placeholder');
     }
   };
 
@@ -98,7 +63,7 @@ const TodoAddBar: React.FC = () => {
             ref={inputRef}
             variant="borderless"
             prefix={<PlusOutlined className="todo-add-icon" />}
-            placeholder={getPlaceholder()}
+            placeholder={t('todo.addDefault.placeholder')}
             value={text}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={handleKeyDown}

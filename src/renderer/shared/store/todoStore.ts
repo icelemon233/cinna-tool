@@ -56,7 +56,7 @@ export const useTodoStore = create<TodoStore>()(
       // State
       todos: [],
       lists: [],
-      currentView: 'my-day',
+      currentView: 'tasks',
       currentListId: null,
       searchQuery: '',
       todayKey: getLocalDateKey(),

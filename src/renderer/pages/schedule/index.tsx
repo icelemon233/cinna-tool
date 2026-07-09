@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { App, Button, Modal, Statistic } from 'antd';
 import {
   CalendarOutlined,
@@ -31,6 +31,9 @@ import './index.css';
 
 interface SchedulePageProps {
   active: boolean;
+  quickCreateRequestId?: number | null;
+  quickDismissKey?: number;
+  onQuickCreateConsumed?: () => void;
 }
 
 function createDraft(startDate: string, endDate: string, color: string): ScheduleDraft {
@@ -47,7 +50,12 @@ function getNextColor(items: ScheduleItem[], offset = 0) {
   return SCHEDULE_COLORS[(items.length + offset) % SCHEDULE_COLORS.length];
 }
 
-const SchedulePage: React.FC<SchedulePageProps> = ({ active }) => {
+const SchedulePage: React.FC<SchedulePageProps> = ({
+  active,
+  quickCreateRequestId = null,
+  quickDismissKey = 0,
+  onQuickCreateConsumed,
+}) => {
   const { message } = App.useApp();
   const { t, locale } = useTranslation();
   const { items, addItem, updateItem, deleteItem } = useScheduleStore();
@@ -100,6 +108,17 @@ const SchedulePage: React.FC<SchedulePageProps> = ({ active }) => {
     setQuickAddOpen(true);
     setFocusKey((value) => value + 1);
   };
+
+  useEffect(() => {
+    if (quickDismissKey <= 0) return;
+    setQuickAddOpen(false);
+  }, [quickDismissKey]);
+
+  useEffect(() => {
+    if (quickCreateRequestId === null) return;
+    openQuickAdd(todayKey, todayKey);
+    onQuickCreateConsumed?.();
+  }, [quickCreateRequestId]);
 
   const selectRange = (startDate: string, endDate: string) => {
     const range = normalizeRange(startDate, endDate);

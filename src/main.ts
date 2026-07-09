@@ -1,4 +1,5 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
+import { registerGlobalShortcuts } from './main-process/app/shortcuts';
 import { createTray, refreshTrayMenu } from './main-process/app/tray';
 import { registerIpcHandlers } from './main-process/ipc/index';
 import { registerMediaProtocolHandlers, registerMediaSchemes } from './main-process/protocols/mediaProtocol';
@@ -97,6 +98,10 @@ app.whenReady().then(() => {
   didCompleteFirstReveal = false;
   mainWindow = createMainWindow(() => isQuitting, handleMainWindowRevealed);
   logStartup('after createMainWindow');
+  registerGlobalShortcuts({
+    getMainWindow: () => mainWindow,
+    showMainWindow,
+  });
   setTimeout(createShellExtras, 12_000).unref?.();
 
   app.on('activate', () => {

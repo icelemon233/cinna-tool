@@ -22,6 +22,8 @@
     min-width: 0;
     height: 100vh;
     background: var(--shell-main-bg);
+    opacity: var(--clipboard-floating-opacity, 0.9);
+    transition: opacity 0.16s ease;
   }
 
   .clipboard-page.is-floating .clipboard-header {

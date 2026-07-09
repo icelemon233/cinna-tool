@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { App as AntdApp, Button, ConfigProvider, Menu, Modal, Spin } from 'antd';
+import { App as AntdApp, Button, ConfigProvider, Input, Menu, Modal, Spin, type MenuProps } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
 import {
@@ -23,12 +23,14 @@ import { isQuickSearchDropFile } from '@/pages/quick-search/constants';
 import type { QuickSearchDropRequest } from '@/pages/quick-search/types';
 import type { ReaderState } from '@/pages/quick-reader/types';
 import { useSettingsStore } from '@/shared/store/settingsStore';
+import { useClipboardStore } from '@/shared/store/clipboardStore';
 import { useTodoStore } from '@/shared/store/todoStore';
 import { useTranslation } from '@/shared/i18n';
 import { getAntdTheme } from './theme';
 import './index.css';
 
 type Page = 'home' | 'todo' | 'schedule' | 'clipboard' | 'chat' | 'documentGen' | 'reader' | 'search' | 'codeDiff' | 'logAnalysis' | 'images' | 'settings';
+type QuickAction = 'create-todo' | 'create-schedule' | 'add-clipboard' | 'toggle-floating';
 
 const ChatPage = lazy(() => import('@/pages/chat'));
 const CodeDiffPage = lazy(() => import('@/pages/code-diff'));
@@ -43,6 +45,7 @@ const SettingsPage = lazy(() => import('@/pages/settings'));
 const TodoPage = lazy(() => import('@/pages/todo'));
 const isClipboardFloatingWindow =
   new URLSearchParams(window.location.search).get('window') === 'clipboard-floating';
+const SETTINGS_STORAGE_KEY = 'cinnatool-settings';
 
 function isLogAnalysisDropFile(file: File): boolean {
   return file.name.toLowerCase().endsWith('.log');
@@ -126,6 +129,23 @@ function toCssUrl(url?: string): string | undefined {
   return `url("${url.replace(/"/g, '%22')}")`;
 }
 
+function normalizeClipboardFloatingOpacity(value: unknown, fallback = 0.9): number {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Math.min(1, Math.max(0.35, value))
+    : fallback;
+}
+
+function getStoredClipboardFloatingOpacity(rawSettings: string | null, fallback = 0.9): number {
+  if (!rawSettings) return fallback;
+
+  try {
+    const parsed = JSON.parse(rawSettings) as { state?: { clipboardFloatingOpacity?: unknown } };
+    return normalizeClipboardFloatingOpacity(parsed.state?.clipboardFloatingOpacity, fallback);
+  } catch {
+    return fallback;
+  }
+}
+
 function PageFallback() {
   return (
     <div className="app-page-loading">
@@ -166,12 +186,21 @@ const App: React.FC = () => {
   const [quickReaderOpen, setQuickReaderOpen] = useState<QuickReaderOpenRequest | null>(null);
   const [logAnalysisDrop, setLogAnalysisDrop] = useState<QuickSearchDropRequest | null>(null);
   const [pendingTextDrop, setPendingTextDrop] = useState<QuickSearchDropRequest | null>(null);
+  const [quickScheduleRequestId, setQuickScheduleRequestId] = useState<number | null>(null);
+  const [quickScheduleDismissKey, setQuickScheduleDismissKey] = useState(0);
+  const [quickTodoOpen, setQuickTodoOpen] = useState(false);
+  const [quickTodoText, setQuickTodoText] = useState('');
+  const [quickClipboardOpen, setQuickClipboardOpen] = useState(false);
+  const [quickClipboardText, setQuickClipboardText] = useState('');
+  const [quickClipboardLoading, setQuickClipboardLoading] = useState(false);
   const dropRequestIdRef = useRef(0);
   const {
     theme,
     language,
+    hideHomePage,
     wallpaperFile,
     wallpaperOpacity,
+    clipboardFloatingOpacity,
     setWallpaperFile,
     dynamicWallpaperFile,
     setDynamicWallpaperFile,
@@ -180,6 +209,9 @@ const App: React.FC = () => {
     Array.isArray(state.todos) ? state.todos.filter((todo) => !todo.completed).length : 0
   ));
   const refreshMyDay = useTodoStore((state) => state.refreshMyDay);
+  const setTodoSearchQuery = useTodoStore((state) => state.setSearchQuery);
+  const addTodo = useTodoStore((state) => state.addTodo);
+  const addClipboardItem = useClipboardStore((state) => state.addItem);
   const { t } = useTranslation();
 
   const openReader = (reader: ReaderState) => {
@@ -210,9 +242,32 @@ const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
+    const applyOpacity = (opacity: number) => {
+      document.documentElement.style.setProperty(
+        '--clipboard-floating-opacity',
+        String(normalizeClipboardFloatingOpacity(opacity))
+      );
+    };
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== SETTINGS_STORAGE_KEY) return;
+      applyOpacity(getStoredClipboardFloatingOpacity(event.newValue, clipboardFloatingOpacity));
+    };
+
+    applyOpacity(clipboardFloatingOpacity);
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [clipboardFloatingOpacity]);
+
+  useEffect(() => {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
     window.electronAPI?.setAppLocale(language).catch(() => {});
   }, [language]);
+
+  useEffect(() => {
+    if (hideHomePage && page === 'home') {
+      setPage('todo');
+    }
+  }, [hideHomePage, page]);
 
   useEffect(() => {
     let timerId: number | undefined;
@@ -248,6 +303,31 @@ const App: React.FC = () => {
       setPage('clipboard');
     });
   }, []);
+
+  useEffect(() => {
+    const handleQuickAction = (action: QuickAction) => {
+      switch (action) {
+        case 'create-todo':
+          openQuickTodoAdd();
+          break;
+        case 'create-schedule':
+          closeQuickActionModals();
+          setPage('schedule');
+          setQuickScheduleRequestId(dropRequestIdRef.current += 1);
+          break;
+        case 'add-clipboard':
+          openQuickClipboardAdd();
+          break;
+        case 'toggle-floating':
+          void window.electronAPI?.toggleClipboardFloatingWindow?.();
+          break;
+        default:
+          break;
+      }
+    };
+
+    return window.electronAPI?.onQuickAction?.(handleQuickAction);
+  }, [addClipboardItem, setTodoSearchQuery]);
 
   useEffect(() => {
     if (isClipboardFloatingWindow) return undefined;
@@ -393,6 +473,7 @@ const App: React.FC = () => {
   const wallpaperImage = toCssUrl(wallpaperFile?.url);
   const isPageMounted = (target: Page) => mountedPages.has(target);
   const openSettings = (section?: SectionId) => {
+    closeQuickActionModals();
     if (section) {
       setSettingsSection(section);
     }
@@ -418,7 +499,113 @@ const App: React.FC = () => {
     setPendingTextDrop(null);
     setPage('logAnalysis');
   };
+  const closeQuickActionModals = () => {
+    setQuickTodoOpen(false);
+    setQuickTodoText('');
+    setQuickClipboardOpen(false);
+    setQuickClipboardText('');
+    setQuickClipboardLoading(false);
+    setQuickScheduleRequestId(null);
+    setQuickScheduleDismissKey((value) => value + 1);
+  };
+  const openQuickTodoAdd = () => {
+    closeQuickActionModals();
+    setTodoSearchQuery('');
+    setPage('todo');
+    setQuickTodoOpen(true);
+    setQuickTodoText('');
+  };
+  const submitQuickTodoAdd = () => {
+    const title = quickTodoText.trim();
+    if (!title) return;
+    addTodo(title);
+    setQuickTodoOpen(false);
+    setQuickTodoText('');
+  };
+  const openQuickClipboardAdd = () => {
+    closeQuickActionModals();
+    setPage('clipboard');
+    setQuickClipboardOpen(true);
+    setQuickClipboardText('');
+    setQuickClipboardLoading(true);
+    const clipboardText = window.electronAPI?.readClipboardText?.() ?? Promise.resolve('');
+    void clipboardText
+      .then((text) => {
+        setQuickClipboardText(text);
+      })
+      .catch(() => {
+        setQuickClipboardText('');
+      })
+      .finally(() => {
+        setQuickClipboardLoading(false);
+      });
+  };
+  const submitQuickClipboardAdd = () => {
+    const id = addClipboardItem(quickClipboardText);
+    if (!id) return;
+    setQuickClipboardOpen(false);
+    setQuickClipboardText('');
+  };
   const pendingDropIsLog = pendingTextDrop ? isLogAnalysisDropFile(pendingTextDrop.file) : false;
+  const navItems: MenuProps['items'] = [
+    ...(!hideHomePage
+      ? [{
+          key: 'home',
+          icon: <HomeOutlined />,
+          label: t('nav.home'),
+        }]
+      : []),
+    {
+      key: 'todo',
+      icon: <CheckSquareOutlined />,
+      label: navLabel(t('nav.todo'), pendingTodoCount),
+    },
+    {
+      key: 'schedule',
+      icon: <CalendarOutlined />,
+      label: t('nav.schedule'),
+    },
+    {
+      key: 'clipboard',
+      icon: <CopyOutlined />,
+      label: t('nav.clipboard'),
+    },
+    {
+      key: 'chat',
+      icon: <MessageOutlined />,
+      label: t('nav.chat'),
+    },
+    {
+      key: 'documentGen',
+      icon: <FileTextOutlined />,
+      label: t('nav.documentGen'),
+    },
+    {
+      key: 'reader',
+      icon: <FileSearchOutlined />,
+      label: t('nav.reader'),
+    },
+    {
+      key: 'search',
+      icon: <SearchOutlined />,
+      label: t('nav.search'),
+    },
+    {
+      key: 'codeDiff',
+      icon: <DiffOutlined />,
+      label: t('nav.codeDiff'),
+    },
+    {
+      key: 'logAnalysis',
+      icon: <BarChartOutlined />,
+      label: t('nav.logAnalysis'),
+    },
+    {
+      key: 'images',
+      icon: <PictureOutlined />,
+      label: t('nav.images'),
+    },
+  ];
 
   if (isClipboardFloatingWindow) {
     return (
@@ -465,6 +652,50 @@ const App: React.FC = () => {
             {t('quickSearch.dropChoiceContent').replace('{name}', pendingTextDrop?.file.name ?? '')}
           </span>
         </Modal>
+        <Modal
+          centered
+          destroyOnHidden
+          okButtonProps={{ disabled: !quickTodoText.trim() }}
+          okText={t('todo.quickAddOk')}
+          onCancel={() => {
+            setQuickTodoOpen(false);
+            setQuickTodoText('');
+          }}
+          onOk={submitQuickTodoAdd}
+          open={quickTodoOpen}
+          title={t('todo.quickAddTitle')}
+        >
+          <Input
+            autoFocus
+            onChange={(event) => setQuickTodoText(event.target.value)}
+            onPressEnter={submitQuickTodoAdd}
+            placeholder={t('todo.quickAddPlaceholder')}
+            value={quickTodoText}
+          />
+        </Modal>
+        <Modal
+          centered
+          destroyOnHidden
+          confirmLoading={quickClipboardLoading}
+          okButtonProps={{ disabled: !quickClipboardText.trim() }}
+          okText={t('clipboard.quickAddOk')}
+          onCancel={() => {
+            setQuickClipboardOpen(false);
+            setQuickClipboardText('');
+          }}
+          onOk={submitQuickClipboardAdd}
+          open={quickClipboardOpen}
+          title={t('clipboard.quickAddTitle')}
+        >
+          <Input.TextArea
+            autoFocus
+            autoSize={{ minRows: 5, maxRows: 10 }}
+            disabled={quickClipboardLoading}
+            onChange={(event) => setQuickClipboardText(event.target.value)}
+            placeholder={t('clipboard.quickAddPlaceholder')}
+            value={quickClipboardText}
+          />
+        </Modal>
         <div
           className="app-shell"
           data-theme={theme}
@@ -477,64 +708,11 @@ const App: React.FC = () => {
               className="app-nav-menu"
               mode="inline"
               selectedKeys={[page]}
-              onClick={({ key }) => setPage(key as Page)}
-              items={[
-                {
-                  key: 'home',
-                  icon: <HomeOutlined />,
-                  label: t('nav.home'),
-                },
-                {
-                  key: 'todo',
-                  icon: <CheckSquareOutlined />,
-                  label: navLabel(t('nav.todo'), pendingTodoCount),
-                },
-                {
-                  key: 'schedule',
-                  icon: <CalendarOutlined />,
-                  label: t('nav.schedule'),
-                },
-                {
-                  key: 'clipboard',
-                  icon: <CopyOutlined />,
-                  label: t('nav.clipboard'),
-                },
-                {
-                  key: 'chat',
-                  icon: <MessageOutlined />,
-                  label: t('nav.chat'),
-                },
-                {
-                  key: 'documentGen',
-                  icon: <FileTextOutlined />,
-                  label: t('nav.documentGen'),
-                },
-                {
-                  key: 'reader',
-                  icon: <FileSearchOutlined />,
-                  label: t('nav.reader'),
-                },
-                {
-                  key: 'search',
-                  icon: <SearchOutlined />,
-                  label: t('nav.search'),
-                },
-                {
-                  key: 'codeDiff',
-                  icon: <DiffOutlined />,
-                  label: t('nav.codeDiff'),
-                },
-                {
-                  key: 'logAnalysis',
-                  icon: <BarChartOutlined />,
-                  label: t('nav.logAnalysis'),
-                },
-                {
-                  key: 'images',
-                  icon: <PictureOutlined />,
-                  label: t('nav.images'),
-                },
-              ]}
+              onClick={({ key }) => {
+                closeQuickActionModals();
+                setPage(key as Page);
+              }}
+              items={navItems}
             />
             <div className="app-sidebar-bottom">
               <button
@@ -582,7 +760,14 @@ const App: React.FC = () => {
                   <div className={`app-page-slot${page === 'todo' ? ' is-active' : ''}`}>
                     {isPageMounted('todo') && <TodoPage />}
                   </div>
-                  {isPageMounted('schedule') && <SchedulePage active={page === 'schedule'} />}
+                  {isPageMounted('schedule') && (
+                    <SchedulePage
+                      active={page === 'schedule'}
+                      quickCreateRequestId={quickScheduleRequestId}
+                      quickDismissKey={quickScheduleDismissKey}
+                      onQuickCreateConsumed={() => setQuickScheduleRequestId(null)}
+                    />
+                  )}
                   <div className={`app-page-slot${page === 'clipboard' ? ' is-active' : ''}`}>
                     {isPageMounted('clipboard') && <ClipboardPage mode="main" />}
                   </div>

@@ -170,14 +170,18 @@ export interface ClaudeCodeEvent {
   signal?: string | null;
 }
 
+export type QuickAction = 'create-todo' | 'create-schedule' | 'add-clipboard' | 'toggle-floating';
+
 export interface ElectronAPI {
   // Window operations
   minimize: () => Promise<void>;
   maximize: () => Promise<void>;
   close: () => Promise<void>;
   openClipboardFloatingWindow: () => Promise<boolean>;
+  toggleClipboardFloatingWindow: () => Promise<boolean>;
   restoreClipboardToMainWindow: () => Promise<boolean>;
   onShowClipboardPage: (callback: () => void) => () => void;
+  onQuickAction: (callback: (action: QuickAction) => void) => () => void;
 
   // System information
   platform: NodeJS.Platform;
@@ -193,6 +197,7 @@ export interface ElectronAPI {
   // App shell
   notifyShellReady: () => void;
   setAppLocale: (locale: 'zh' | 'en') => Promise<boolean>;
+  readClipboardText: () => Promise<string>;
   writeClipboardText: (text: string) => Promise<boolean>;
   openExternalUrl: (url: string) => Promise<boolean>;
   fetchHomeDashboard: (

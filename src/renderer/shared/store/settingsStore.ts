@@ -17,7 +17,9 @@ export interface SettingsState {
   language: 'zh' | 'en';
   wallpaperFile: WallpaperFileInfo | null;
   dynamicWallpaperFile: WallpaperFileInfo | null;
+  hideHomePage: boolean;
   wallpaperOpacity: number;
+  clipboardFloatingOpacity: number;
   downloadPath: string;
 }
 
@@ -28,7 +30,9 @@ export interface SettingsActions {
   setLanguage: (lang: 'zh' | 'en') => void;
   setWallpaperFile: (file: WallpaperFileInfo | null) => void;
   setDynamicWallpaperFile: (file: WallpaperFileInfo | null) => void;
+  setHideHomePage: (hidden: boolean) => void;
   setWallpaperOpacity: (opacity: number) => void;
+  setClipboardFloatingOpacity: (opacity: number) => void;
   setDownloadPath: (path: string) => void;
 }
 
@@ -43,7 +47,9 @@ export const useSettingsStore = create<SettingsStore>()(
       language: 'zh',
       wallpaperFile: null,
       dynamicWallpaperFile: null,
+      hideHomePage: false,
       wallpaperOpacity: 0.74,
+      clipboardFloatingOpacity: 0.9,
       downloadPath: '',
 
       setTheme: (theme: ThemeType) => {
@@ -76,8 +82,16 @@ export const useSettingsStore = create<SettingsStore>()(
         set({ dynamicWallpaperFile: file });
       },
 
+      setHideHomePage: (hidden: boolean) => {
+        set({ hideHomePage: hidden });
+      },
+
       setWallpaperOpacity: (opacity: number) => {
         set({ wallpaperOpacity: Math.min(1, Math.max(0.15, opacity)) });
+      },
+
+      setClipboardFloatingOpacity: (opacity: number) => {
+        set({ clipboardFloatingOpacity: Math.min(1, Math.max(0.35, opacity)) });
       },
 
       setDownloadPath: (path: string) => {
@@ -91,7 +105,9 @@ export const useSettingsStore = create<SettingsStore>()(
         language: state.language,
         wallpaperFile: state.wallpaperFile?.path ? state.wallpaperFile : null,
         dynamicWallpaperFile: state.dynamicWallpaperFile?.path ? state.dynamicWallpaperFile : null,
+        hideHomePage: state.hideHomePage,
         wallpaperOpacity: state.wallpaperOpacity,
+        clipboardFloatingOpacity: state.clipboardFloatingOpacity,
         downloadPath: state.downloadPath,
       }),
     }

@@ -5,14 +5,13 @@ import {
   DeleteOutlined,
   StarFilled,
   StarOutlined,
-  SunOutlined,
-  UnorderedListOutlined,
 } from '@ant-design/icons';
 import type { Todo } from '@/shared/types/todo';
 import { useTodoStore } from '@/shared/store/todoStore';
 import { useTranslation } from '@/shared/i18n';
 
 interface TodoTaskItemProps {
+  compact?: boolean;
   todo: Todo;
 }
 
@@ -41,13 +40,11 @@ function getDueDateColor(ts: number): string {
   return 'default';
 }
 
-const TodoTaskItem: React.FC<TodoTaskItemProps> = ({ todo }) => {
+const TodoTaskItem: React.FC<TodoTaskItemProps> = ({ compact = false, todo }) => {
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
   const toggleImportant = useTodoStore((state) => state.toggleImportant);
-  const toggleMyDay = useTodoStore((state) => state.toggleMyDay);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const setDueDate = useTodoStore((state) => state.setDueDate);
-  const lists = useTodoStore((state) => state.lists);
   const { t } = useTranslation();
 
   const priorityConfig = useMemo<Record<string, { label: string; color: string }>>(
@@ -59,28 +56,17 @@ const TodoTaskItem: React.FC<TodoTaskItemProps> = ({ todo }) => {
     [t]
   );
 
-  const listName = useMemo(
-    () => (todo.listId ? lists.find((list) => list.id === todo.listId)?.name : undefined),
-    [lists, todo.listId]
-  );
-
   const menuItems = useMemo<MenuProps['items']>(
     () => [
       {
-        key: 'my-day',
-        icon: <SunOutlined />,
-        label: todo.myDay ? t('todo.removeFromMyDay') : t('todo.addToMyDay'),
+        key: 'due-today',
+        icon: <CalendarOutlined />,
+        label: todo.dueDate ? t('todo.clearDueDate') : t('todo.setDueToday'),
       },
       {
         key: 'important',
         icon: todo.important ? <StarFilled /> : <StarOutlined />,
         label: todo.important ? t('todo.unmarkImportant') : t('todo.markImportant'),
-      },
-      { type: 'divider' },
-      {
-        key: 'due-today',
-        icon: <CalendarOutlined />,
-        label: todo.dueDate ? t('todo.clearDueDate') : t('todo.setDueToday'),
       },
       { type: 'divider' },
       {
@@ -90,14 +76,11 @@ const TodoTaskItem: React.FC<TodoTaskItemProps> = ({ todo }) => {
         danger: true,
       },
     ],
-    [t, todo.dueDate, todo.important, todo.myDay]
+    [t, todo.dueDate, todo.important]
   );
 
   const handleMenuClick = useCallback<NonNullable<MenuProps['onClick']>>(({ key }) => {
     switch (key) {
-      case 'my-day':
-        toggleMyDay(todo.id);
-        break;
       case 'important':
         toggleImportant(todo.id);
         break;
@@ -113,11 +96,11 @@ const TodoTaskItem: React.FC<TodoTaskItemProps> = ({ todo }) => {
       default:
         break;
     }
-  }, [deleteTodo, setDueDate, todo.dueDate, todo.id, toggleImportant, toggleMyDay]);
+  }, [deleteTodo, setDueDate, todo.dueDate, todo.id, toggleImportant]);
 
   return (
     <Dropdown trigger={['contextMenu']} menu={{ items: menuItems, onClick: handleMenuClick }}>
-      <div className="todo-task-row">
+      <div className={`todo-task-row${compact ? ' is-compact' : ''}`}>
         <Checkbox checked={todo.completed} onChange={() => toggleTodo(todo.id)} />
         <div className="todo-task-content">
           <Typography.Text
@@ -136,12 +119,6 @@ const TodoTaskItem: React.FC<TodoTaskItemProps> = ({ todo }) => {
               <Tag color={getDueDateColor(todo.dueDate)} icon={<CalendarOutlined />}>
                 {formatDueDate(todo.dueDate, t)}
               </Tag>
-            )}
-            {todo.myDay && !todo.completed && (
-              <Tag icon={<SunOutlined />}>{t('todo.myDay')}</Tag>
-            )}
-            {listName && (
-              <Tag icon={<UnorderedListOutlined />}>{listName}</Tag>
             )}
           </div>
         </div>

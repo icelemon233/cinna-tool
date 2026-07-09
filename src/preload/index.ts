@@ -6,11 +6,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   maximize: () => ipcRenderer.invoke('window:maximize'),
   close: () => ipcRenderer.invoke('window:close'),
   openClipboardFloatingWindow: () => ipcRenderer.invoke('clipboard-window:open'),
+  toggleClipboardFloatingWindow: () => ipcRenderer.invoke('clipboard-window:toggle'),
   restoreClipboardToMainWindow: () => ipcRenderer.invoke('clipboard-window:restore-main'),
   onShowClipboardPage: (callback: () => void) => {
     const listener = () => callback();
     ipcRenderer.on('clipboard:show-main', listener);
     return () => ipcRenderer.removeListener('clipboard:show-main', listener);
+  },
+  onQuickAction: (callback: (action: string) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, action: string) => callback(action);
+    ipcRenderer.on('app:quick-action', listener);
+    return () => ipcRenderer.removeListener('app:quick-action', listener);
   },
 
   // System information
@@ -27,6 +33,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // App shell
   notifyShellReady: () => ipcRenderer.send('app:shell-ready'),
   setAppLocale: (locale: 'zh' | 'en') => ipcRenderer.invoke('app:set-locale', locale),
+  readClipboardText: () => ipcRenderer.invoke('clipboard:read-text'),
   writeClipboardText: (text: string) => ipcRenderer.invoke('clipboard:write-text', text),
   openExternalUrl: (url: string) => ipcRenderer.invoke('app:open-external', url),
   fetchHomeDashboard: (

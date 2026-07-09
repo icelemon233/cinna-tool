@@ -46,8 +46,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ activeSection, onSectionCha
     setWallpaperFile,
     dynamicWallpaperFile,
     setDynamicWallpaperFile,
+    hideHomePage,
+    setHideHomePage,
     wallpaperOpacity,
     setWallpaperOpacity,
+    clipboardFloatingOpacity,
+    setClipboardFloatingOpacity,
     downloadPath,
     setDownloadPath,
   } = useSettingsStore();
@@ -172,19 +176,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ activeSection, onSectionCha
           {activeSection === 'appearance' && (
             <AppearanceSection
               dynamicWallpaperFile={dynamicWallpaperFile}
+              hideHomePage={hideHomePage}
               language={language}
               nativeWallpaperPickerAvailable={Boolean(window.electronAPI?.selectWallpaperFile)}
               onLocalWallpaperFile={handleLocalWallpaperFile}
               onWallpaperFile={handleWallpaperFile}
               setDynamicWallpaperFile={setDynamicWallpaperFile}
+              setHideHomePage={setHideHomePage}
               setLanguage={setLanguage}
               setTheme={setTheme}
               setWallpaperFile={setWallpaperFile}
               setWallpaperOpacity={setWallpaperOpacity}
+              setClipboardFloatingOpacity={setClipboardFloatingOpacity}
               t={t}
               theme={theme}
               wallpaperFile={wallpaperFile}
               wallpaperOpacity={wallpaperOpacity}
+              clipboardFloatingOpacity={clipboardFloatingOpacity}
             />
           )}
           {activeSection === 'downloads' && (

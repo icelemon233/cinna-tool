@@ -98,6 +98,29 @@
     background: transparent;
   }
 
+  .todo-sidebar-tasks {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    padding: 2px 0;
+    scrollbar-width: none;
+  }
+
+  .todo-sidebar-tasks::-webkit-scrollbar {
+    display: none;
+  }
+
+  .todo-sidebar-empty {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 8px;
+  }
+
   .todo-list-row {
     display: flex;
     align-items: center;
@@ -329,6 +352,21 @@
     transition: background 0.15s ease;
   }
 
+  .todo-task-row.is-compact {
+    min-height: 48px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .todo-task-row.is-compact .todo-task-actions {
+    gap: 0;
+  }
+
+  .todo-task-row.is-compact .todo-task-actions .ant-btn {
+    width: 26px;
+    min-width: 26px;
+  }
+
   .todo-task-row:hover {
     background: var(--accent-light);
   }
@@ -406,24 +444,9 @@
       padding: 10px;
     }
 
-    .todo-sidebar-nav {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px;
-    }
-
-    .todo-nav-button {
-      justify-content: center;
-      padding-inline: 6px;
-    }
-
-    .todo-nav-button .anticon {
-      margin-inline-end: 6px;
-    }
-
-    .todo-sidebar-lists {
+    .todo-sidebar-tasks {
       flex: 0 1 auto;
-      max-height: 56px;
+      max-height: 88px;
       padding: 0;
     }
 
@@ -460,12 +483,9 @@
   }
 
   @media (max-width: 360px) {
-    .todo-sidebar-nav .nav-label {
+    .todo-task-row.is-compact .todo-task-meta,
+    .todo-task-row.is-compact .todo-task-actions {
       display: none;
-    }
-
-    .todo-nav-button .anticon {
-      margin-inline-end: 0;
     }
   }
 }

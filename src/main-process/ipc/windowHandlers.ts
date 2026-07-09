@@ -34,6 +34,47 @@ export function registerWindowHandlers({
     mainWindow.webContents.send('clipboard:show-main');
   };
 
+  const createClipboardWindow = () => {
+    clipboardWindow = new BrowserWindow({
+      width: 400,
+      height: 600,
+      minWidth: 400,
+      minHeight: 600,
+      maxWidth: 400,
+      maxHeight: 600,
+      frame: false,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      alwaysOnTop: true,
+      show: false,
+      title: 'CinnaTool Clipboard',
+      transparent: true,
+      backgroundColor: '#00000000',
+      webPreferences: {
+        preload: path.join(__dirname, '../../preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: false,
+      },
+    });
+
+    clipboardWindow.on('close', () => {
+      if (restoringFromClipboardWindow || !isMainWindowLocked()) return;
+      showMainClipboardPage();
+    });
+
+    clipboardWindow.on('closed', () => {
+      clipboardWindow = null;
+      restoringFromClipboardWindow = false;
+    });
+
+    loadClipboardWindow(clipboardWindow);
+    clipboardWindow.once('ready-to-show', () => {
+      clipboardWindow?.show();
+    });
+  };
+
   ipcMain.handle('window:minimize', () => {
     getMainWindow()?.minimize();
   });
@@ -71,43 +112,26 @@ export function registerWindowHandlers({
       mainWindow.setSkipTaskbar(true);
     }
 
-    clipboardWindow = new BrowserWindow({
-      width: 400,
-      height: 600,
-      minWidth: 400,
-      minHeight: 600,
-      maxWidth: 400,
-      maxHeight: 600,
-      frame: false,
-      resizable: false,
-      minimizable: false,
-      maximizable: false,
-      alwaysOnTop: true,
-      show: false,
-      title: 'CinnaTool Clipboard',
-      backgroundColor: '#fbfbfa',
-      webPreferences: {
-        preload: path.join(__dirname, '../../preload.js'),
-        contextIsolation: true,
-        nodeIntegration: false,
-        sandbox: false,
-      },
-    });
+    createClipboardWindow();
+    return true;
+  });
 
-    clipboardWindow.on('close', () => {
-      if (restoringFromClipboardWindow || !isMainWindowLocked()) return;
+  ipcMain.handle('clipboard-window:toggle', () => {
+    if (clipboardWindow && !clipboardWindow.isDestroyed()) {
+      restoringFromClipboardWindow = true;
       showMainClipboardPage();
-    });
+      clipboardWindow.close();
+      return true;
+    }
 
-    clipboardWindow.on('closed', () => {
-      clipboardWindow = null;
-      restoringFromClipboardWindow = false;
-    });
+    const mainWindow = getMainWindow();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      setMainWindowLocked(true);
+      mainWindow.hide();
+      mainWindow.setSkipTaskbar(true);
+    }
 
-    loadClipboardWindow(clipboardWindow);
-    clipboardWindow.once('ready-to-show', () => {
-      clipboardWindow?.show();
-    });
+    createClipboardWindow();
     return true;
   });
 

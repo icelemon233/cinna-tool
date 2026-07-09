@@ -131,7 +131,8 @@ export function ScheduleCalendar({
       <div className="schedule-calendar-grid">
         {days.map((day) => {
           const dayItems = itemsByDate.get(day.key) ?? [];
-          const visibleItems = dayItems.slice(0, 3);
+          const visibleItemLimit = dayItems.length > 3 ? 2 : 3;
+          const visibleItems = dayItems.slice(0, visibleItemLimit);
           const hiddenCount = dayItems.length - visibleItems.length;
           const selected = isDateInRange(day.key, visibleRange.startDate, visibleRange.endDate);
           const label = `${day.key} ${t('schedule.dayCell')}`;
@@ -175,12 +176,14 @@ export function ScheduleCalendar({
                     title={`${item.title} · ${formatDateRange(item.startDate, item.endDate, locale)}`}
                     type="button"
                   >
-                    {item.title}
+                    <span className="schedule-item-chip-text">{item.title}</span>
                   </button>
                 ))}
                 {hiddenCount > 0 && (
                   <span className="schedule-more-chip">
-                    {t('schedule.moreItems').replace('{count}', `${hiddenCount}`)}
+                    <span className="schedule-more-chip-text">
+                      {t('schedule.moreItems').replace('{count}', `${hiddenCount}`)}
+                    </span>
                   </span>
                 )}
               </div>

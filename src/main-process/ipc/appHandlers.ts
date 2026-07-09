@@ -17,6 +17,8 @@ export function registerAppHandlers(): void {
     return true;
   });
 
+  ipcMain.handle('clipboard:read-text', () => clipboard.readText());
+
   ipcMain.handle('app:open-external', async (_event, url: string) => {
     await shell.openExternal(url);
     return true;
