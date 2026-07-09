@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, App as AntdApp, Button, Input, Tag } from 'antd';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, App as AntdApp, Button, Input, Radio, Tag } from 'antd';
 import {
   CopyOutlined,
   DeleteOutlined,
@@ -21,6 +21,9 @@ const { TextArea } = Input;
 
 type GenerationMode = 'reflection' | null;
 type RequirementListKey = 'businessItems' | 'technicalItems';
+type SummaryKind = 'fullYear' | 'halfYear';
+
+const SAVED_PATH_VISIBLE_MS = 2000;
 
 interface RequirementItem {
   id: string;
@@ -49,6 +52,7 @@ interface SuggestionItem {
 }
 
 interface ReviewFormState {
+  summaryKind: SummaryKind;
   year: string;
   roleSummary: string;
   demandSummary: string;
@@ -78,6 +82,7 @@ interface RequirementSectionProps {
 }
 
 interface PlanSectionProps {
+  title: string;
   items: PlanItem[];
   onAdd: () => void;
   onRemove: (id: string) => void;
@@ -96,10 +101,15 @@ interface DocumentGeneratorPageProps {
 }
 
 const REFLECTION_SYSTEM_PROMPT = [
-  '你是资深述职材料编辑，只负责根据脱敏材料生成年度自评的总结与反思。',
+  '你是资深述职材料编辑，只负责根据脱敏材料生成工作总结的总结与反思。',
   '不要编造精确数据；缺少数据时保留 XX 或“待补充”。',
   '避免空泛套话，重点分析成长、问题、改进方向和团队协作。',
 ].join('\n');
+
+const SUMMARY_KIND_OPTIONS: Array<{ label: string; value: SummaryKind }> = [
+  { label: '全年总结', value: 'fullYear' },
+  { label: '半年总结', value: 'halfYear' },
+];
 
 const REQUIREMENT_FIELDS: Array<{
   key: keyof Omit<RequirementItem, 'id'>;
@@ -184,6 +194,7 @@ function createSuggestionItem(): SuggestionItem {
 function createInitialForm(): ReviewFormState {
   const year = String(new Date().getFullYear());
   return {
+    summaryKind: 'fullYear',
     year,
     roleSummary: '',
     demandSummary: '',
@@ -279,6 +290,30 @@ function getNextYear(year: string): string {
     : '下一年度';
 }
 
+function getSummaryKindLabel(kind: SummaryKind): string {
+  return kind === 'halfYear' ? '半年总结' : '全年总结';
+}
+
+function getWorkSummaryTitle(form: ReviewFormState): string {
+  const year = display(form.year);
+  return form.summaryKind === 'halfYear'
+    ? `${year} 年半年工作总结`
+    : `${year} 年全年工作总结`;
+}
+
+function getPlanPeriodLabel(form: ReviewFormState): string {
+  if (form.summaryKind === 'halfYear') {
+    return '下半年';
+  }
+
+  const nextYear = getNextYear(form.year);
+  return nextYear === '下一年度' ? nextYear : `${nextYear} 年`;
+}
+
+function getPlanSectionTitle(form: ReviewFormState): string {
+  return `${getPlanPeriodLabel(form)}规划`;
+}
+
 function formatRequirementProblemCell(item: RequirementItem): string {
   const title = hasText(item.name) ? `**${item.name.trim()}**` : '';
   const link = hasText(item.link) ? `PRD 链接：${item.link.trim()}` : '';
@@ -351,10 +386,11 @@ function buildSuggestionMarkdownTable(items: SuggestionItem[]): string {
 
 function buildPreviewMarkdown(form: ReviewFormState): string {
   const year = display(form.year);
+  const summaryLabel = getSummaryKindLabel(form.summaryKind);
   return [
-    `# ${year} 年度自评`,
+    `# ${year} ${summaryLabel}`,
     '',
-    `## 一、${year} 年工作总结`,
+    `## 一、${getWorkSummaryTitle(form)}`,
     '',
     '| 事项 | 结果 |',
     '| :--- | :--- |',
@@ -371,7 +407,7 @@ function buildPreviewMarkdown(form: ReviewFormState): string {
     '',
     buildRequirementMarkdownTable(form.technicalItems),
     '',
-    `## 二、${getNextYear(form.year)} 年规划`,
+    `## 二、${getPlanSectionTitle(form)}`,
     '',
     buildPlanMarkdownTable(form.plans),
     '',
@@ -414,12 +450,12 @@ function formatRequirementItems(title: string, items: RequirementItem[]): string
   ].join('\n');
 }
 
-function formatPlanItems(items: PlanItem[]): string {
+function formatPlanItems(title: string, items: PlanItem[]): string {
   const meaningfulItems = items.filter(hasPlanContent);
-  if (meaningfulItems.length === 0) return '下一年度规划：未填写';
+  if (meaningfulItems.length === 0) return `${title}：未填写`;
 
   return [
-    '下一年度规划：',
+    `${title}：`,
     ...meaningfulItems.map((item, index) => [
       `${index + 1}. 重点问题：${display(item.problem)}`,
       `   解决思路：${display(item.approach)}`,
@@ -443,11 +479,13 @@ function formatSuggestionItems(items: SuggestionItem[]): string {
 }
 
 function buildSourceMaterial(form: ReviewFormState): string {
+  const planTitle = getPlanSectionTitle(form);
   return [
-    `自评年度：${display(form.year)}`,
-    `下一年度：${getNextYear(form.year)}`,
+    `总结类型：${getSummaryKindLabel(form.summaryKind)}`,
+    `总结年份：${display(form.year)}`,
+    `规划周期：${getPlanPeriodLabel(form)}`,
     '',
-    '年度工作总结：',
+    `${getWorkSummaryTitle(form)}：`,
     `- 岗位：${display(form.roleSummary)}`,
     `- 需求完成情况：${display(form.demandSummary)}`,
     `- 过程质量：${display(form.processQuality)}`,
@@ -457,7 +495,7 @@ function buildSourceMaterial(form: ReviewFormState): string {
     '',
     formatRequirementItems('技术需求 STAR 材料', form.technicalItems),
     '',
-    formatPlanItems(form.plans),
+    formatPlanItems(planTitle, form.plans),
     '',
     formatSuggestionItems(form.suggestions),
     '',
@@ -467,10 +505,10 @@ function buildSourceMaterial(form: ReviewFormState): string {
 
 function buildReflectionPrompt(form: ReviewFormState): string {
   return [
-    '请只生成年度自评中的「总结&反思」正文，不要输出标题。',
+    `请只生成${getSummaryKindLabel(form.summaryKind)}中的「总结&反思」正文，不要输出标题。`,
     '',
     '要求：',
-    '- 必须根据已填写的岗位、业务需求、技术需求、不足、下一年度规划进行分析。',
+    '- 必须根据已填写的岗位、业务需求、技术需求、不足和规划内容进行分析。',
     '- 需要体现成长、问题、改进方向和对团队的感谢，语气自然，不要空泛。',
     '- 如果用户已经写了草稿，可以保留个人表达并做结构化润色。',
     '- 300 到 500 字左右，不要编造精确数据。',
@@ -574,7 +612,7 @@ const RequirementSection: React.FC<RequirementSectionProps> = ({
             <Field
               label="需求名称"
               value={item.name}
-              placeholder="例如：Keeta 3.0 动态化迁移"
+              placeholder="请输入需求名称"
               onChange={(value) => onChange(item.id, { name: value })}
             />
             <Field
@@ -603,6 +641,7 @@ const RequirementSection: React.FC<RequirementSectionProps> = ({
 );
 
 const PlanSection: React.FC<PlanSectionProps> = ({
+  title,
   items,
   onAdd,
   onRemove,
@@ -610,7 +649,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
 }) => (
   <section className="docgen-section">
     <div className="docgen-section-header">
-      <h2>下一年度规划</h2>
+      <h2>{title}</h2>
       <Button icon={<PlusOutlined />} onClick={onAdd}>
         添加规划
       </Button>
@@ -710,17 +749,38 @@ const DocumentGeneratorPage: React.FC<DocumentGeneratorPageProps> = ({ active })
   const [generationMode, setGenerationMode] = useState<GenerationMode>(null);
   const [generationError, setGenerationError] = useState('');
   const [savedPath, setSavedPath] = useState('');
+  const savedPathTimerRef = useRef<number | null>(null);
 
   const isGenerating = generationMode !== null;
+  const summaryLabel = getSummaryKindLabel(form.summaryKind);
+  const planSectionTitle = getPlanSectionTitle(form);
   const previewMarkdown = useMemo(() => buildPreviewMarkdown(form), [form]);
   const hasPreviewMarkdown = previewMarkdown.trim().length > 0;
   const previewTitle = useMemo(
-    () => form.year.trim() ? `${form.year.trim()} 年度自评.md` : '年度自评.md',
-    [form.year]
+    () => form.year.trim() ? `${form.year.trim()} ${summaryLabel}.md` : `${summaryLabel}.md`,
+    [form.year, summaryLabel]
   );
 
   const updateForm = (patch: Partial<ReviewFormState>) => {
     setForm((current) => ({ ...current, ...patch }));
+  };
+
+  useEffect(() => () => {
+    if (savedPathTimerRef.current !== null) {
+      window.clearTimeout(savedPathTimerRef.current);
+    }
+  }, []);
+
+  const showSavedPath = (path: string) => {
+    if (savedPathTimerRef.current !== null) {
+      window.clearTimeout(savedPathTimerRef.current);
+    }
+
+    setSavedPath(path);
+    savedPathTimerRef.current = window.setTimeout(() => {
+      setSavedPath('');
+      savedPathTimerRef.current = null;
+    }, SAVED_PATH_VISIBLE_MS);
   };
 
   const updateRequirement = (
@@ -796,7 +856,7 @@ const DocumentGeneratorPage: React.FC<DocumentGeneratorPageProps> = ({ active })
 
   const handleGenerateReflection = async () => {
     if (!hasFormContent(form)) {
-      message.warning('先填写一些年度材料，再生成总结&反思');
+      message.warning('先填写一些总结材料，再生成总结&反思');
       return;
     }
 
@@ -848,10 +908,10 @@ const DocumentGeneratorPage: React.FC<DocumentGeneratorPageProps> = ({ active })
       }
       const result = await window.electronAPI.saveGeneratedDocument({
         content: previewMarkdown,
-        fileName: `年度自评-${form.year.trim() || '未命名'}`,
+        fileName: `${summaryLabel}-${form.year.trim() || '未命名'}`,
         extension: 'md',
       });
-      setSavedPath(result.path);
+      showSavedPath(result.path);
       message.success(`已保存：${result.fileName}`);
     } catch (err) {
       message.error(err instanceof Error ? err.message : String(err));
@@ -864,7 +924,7 @@ const DocumentGeneratorPage: React.FC<DocumentGeneratorPageProps> = ({ active })
         <div>
           <div className="docgen-title-line">
             <FileTextOutlined />
-            <h1>年度自评生成</h1>
+            <h1>总结生成</h1>
           </div>
           <p>按 STAR 拆解需求，生成参考述职结构的 Markdown 文档。</p>
         </div>
@@ -881,11 +941,20 @@ const DocumentGeneratorPage: React.FC<DocumentGeneratorPageProps> = ({ active })
         <div className="docgen-editor">
           <section className="docgen-section">
             <div className="docgen-section-header">
-              <h2>年度工作总结</h2>
+              <h2>工作总结</h2>
             </div>
             <div className="docgen-grid">
+              <div className="docgen-field">
+                <span className="docgen-field-label">总结类型</span>
+                <Radio.Group
+                  className="docgen-summary-kind"
+                  options={SUMMARY_KIND_OPTIONS}
+                  value={form.summaryKind}
+                  onChange={(event) => updateForm({ summaryKind: event.target.value as SummaryKind })}
+                />
+              </div>
               <Field
-                label="年度"
+                label="年份"
                 value={form.year}
                 placeholder="2026"
                 onChange={(value) => updateForm({ year: value })}
@@ -939,6 +1008,7 @@ const DocumentGeneratorPage: React.FC<DocumentGeneratorPageProps> = ({ active })
           />
 
           <PlanSection
+            title={planSectionTitle}
             items={form.plans}
             onAdd={() => updateForm({ plans: [...form.plans, createPlanItem()] })}
             onRemove={(id) => updateForm({

@@ -8,7 +8,7 @@ interface SaveGeneratedDocumentRequest {
   extension?: unknown;
 }
 
-const DEFAULT_FILE_NAME = '年度自评';
+const DEFAULT_FILE_NAME = '工作总结';
 const MAX_FILE_NAME_LENGTH = 80;
 
 function sanitizeFileName(value: unknown): string {

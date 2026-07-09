@@ -159,6 +159,16 @@
   resize: vertical;
 }
 
+.docgen-summary-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.docgen-summary-kind .ant-radio-wrapper {
+  margin-inline-end: 0;
+}
+
 .docgen-repeat-list {
   display: flex;
   flex-direction: column;
