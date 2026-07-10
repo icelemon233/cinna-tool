@@ -1,4 +1,11 @@
+packages:
+  - electron
+  - tauri
+
 allowBuilds:
+  electron: true
+  electron-winstaller: true
   esbuild: true
+
 overrides:
   form-data: 4.0.6

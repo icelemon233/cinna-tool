@@ -1,0 +1,40 @@
+@layer components {
+  .floating-tools-window {
+    height: 100vh;
+    overflow: hidden;
+    background: var(--shell-main-bg);
+  }
+
+  .floating-tools-tabs.ant-tabs {
+    height: 100%;
+  }
+
+  .floating-tools-tabs > .ant-tabs-nav {
+    flex: 0 0 44px;
+    margin: 0;
+    padding: 0 10px;
+    background: color-mix(in srgb, var(--shell-main-bg) 92%, transparent);
+    -webkit-app-region: drag;
+  }
+
+  .floating-tools-tabs > .ant-tabs-nav .ant-tabs-tab,
+  .floating-tools-tabs > .ant-tabs-nav .ant-tabs-nav-operations {
+    -webkit-app-region: no-drag;
+  }
+
+  .floating-tools-tabs > .ant-tabs-nav .ant-tabs-tab {
+    padding: 9px 2px;
+  }
+
+  .floating-tools-tabs > .ant-tabs-content-holder,
+  .floating-tools-tabs > .ant-tabs-content-holder > .ant-tabs-content,
+  .floating-tools-tabs > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .floating-tools-window .clipboard-page.is-floating,
+  .floating-tools-window .translation-page.is-floating {
+    height: 100%;
+  }
+}

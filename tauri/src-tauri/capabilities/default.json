@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default permissions for CinnaTool Tauri windows.",
+  "windows": ["main", "clipboard-floating"],
+  "permissions": [
+    "core:window:default",
+    "core:event:default",
+    "dialog:allow-open",
+    "opener:allow-open-url",
+    "opener:allow-default-urls",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text"
+  ]
+}

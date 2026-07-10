@@ -1,0 +1,299 @@
+.settings-page {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 260px minmax(540px, 1fr);
+  min-width: 800px;
+  overflow: hidden;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 34px 18px;
+  overflow: auto;
+  border-right: 1px solid var(--shell-border);
+}
+
+.settings-nav-title {
+  padding: 0 18px 26px;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 760;
+}
+
+.settings-nav-button {
+  width: 100%;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 27px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.settings-nav-button:hover,
+.settings-nav-button.is-active {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.settings-nav-button:hover {
+  transform: translateX(2px);
+}
+
+.settings-content {
+  min-width: 0;
+  overflow: auto;
+  padding: 32px 28px 56px;
+}
+
+.settings-content-inner {
+  width: min(100%, 1080px);
+  min-width: 0;
+}
+
+.settings-search-wrap {
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.settings-search-wrap .ant-input-affix-wrapper {
+  height: 56px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--shell-main-bg) 86%, var(--bg-card));
+  border-color: var(--shell-border);
+  padding-inline: 20px;
+}
+
+.settings-section {
+  margin-bottom: 28px;
+  scroll-margin-top: 20px;
+}
+
+.settings-section-title {
+  margin: 0 0 14px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.settings-card {
+  overflow: hidden;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--shell-main-bg) 82%, transparent);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(18px);
+}
+
+.settings-ai-card {
+  display: flex;
+  justify-content: center;
+}
+
+.settings-file-input {
+  display: none;
+}
+
+.settings-row {
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(200px, max-content);
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+}
+
+.settings-row + .settings-row {
+  border-top: 1px solid var(--shell-border);
+}
+
+.settings-row--full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.settings-row--app-info {
+  grid-template-columns: minmax(260px, 1fr) minmax(360px, max-content);
+}
+
+.settings-row-main {
+  min-width: 220px;
+}
+
+.settings-row-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.settings-row-desc {
+  display: block;
+  max-width: 720px;
+  line-height: 1.7;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.settings-row-control {
+  width: min(360px, 100%);
+  justify-self: end;
+}
+
+.settings-row-control--switch {
+  width: auto;
+  min-width: 56px;
+}
+
+.settings-row-control--button {
+  width: 200px;
+}
+
+.settings-row--app-info .settings-row-control {
+  width: auto;
+  justify-self: end;
+}
+
+.settings-row-control .ant-select,
+.settings-row-control > .ant-btn {
+  width: 100%;
+}
+
+.settings-row-control .ant-select-selector {
+  min-height: 48px;
+  border-radius: 8px !important;
+  background: color-mix(in srgb, var(--shell-main-bg) 84%, transparent) !important;
+}
+
+.settings-control-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-button-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.settings-button-row .ant-btn {
+  width: auto;
+}
+
+.settings-button-row .settings-choose-button {
+  width: 100%;
+}
+
+.settings-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.settings-swatch {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.settings-path-text {
+  display: block;
+  margin-top: 8px;
+  max-width: min(680px, 100%);
+  overflow: hidden;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-about-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 14px 34px;
+  width: 100%;
+}
+
+.settings-about-item {
+  min-width: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.settings-about-value {
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+}
+
+@media (max-width: 799px) {
+  .settings-page {
+    min-width: 560px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow: auto;
+  }
+
+  .settings-nav {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--shell-border);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .settings-nav-title {
+    display: none;
+  }
+
+  .settings-nav-button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: max-content;
+    height: 44px;
+    padding-inline: 16px;
+  }
+
+  .settings-content {
+    padding: 22px 18px 32px;
+    overflow: visible;
+  }
+
+  .settings-content-inner {
+    min-width: 524px;
+  }
+
+  .settings-row,
+  .settings-row--app-info {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .settings-row-control,
+  .settings-row-control--button,
+  .settings-row-control--switch {
+    width: 100%;
+    justify-self: stretch;
+  }
+}

@@ -1,0 +1,389 @@
+.document-generator-page {
+  height: 100%;
+  min-width: 980px;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--text-primary);
+}
+
+.document-generator-page.is-active {
+  display: flex;
+  animation: pageIn 0.2s ease;
+}
+
+.docgen-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 32px 16px;
+}
+
+.docgen-title-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.docgen-title-line > .anticon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 28px;
+}
+
+.docgen-title-line h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.docgen-header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+}
+
+.docgen-header-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.docgen-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(560px, 1fr) minmax(380px, 0.58fr);
+  gap: 16px;
+  padding: 0 32px 32px;
+  overflow: hidden;
+}
+
+.docgen-editor,
+.docgen-preview {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.docgen-editor,
+.docgen-preview-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.docgen-editor::-webkit-scrollbar,
+.docgen-preview-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.docgen-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-right: 2px;
+}
+
+.docgen-section {
+  flex: 0 0 auto;
+  min-width: 0;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--shell-main-bg) 86%, transparent);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.docgen-section-header {
+  min-height: 58px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--shell-border);
+}
+
+.docgen-section-header h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.docgen-section-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.docgen-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.docgen-grid + .docgen-grid {
+  padding-top: 0;
+}
+
+.docgen-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.docgen-field-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.docgen-field .ant-input,
+.docgen-field .ant-input-outlined {
+  border-radius: 8px;
+}
+
+.docgen-field textarea.ant-input {
+  resize: vertical;
+}
+
+.docgen-summary-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.docgen-summary-kind .ant-radio-wrapper {
+  margin-inline-end: 0;
+}
+
+.docgen-repeat-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.docgen-repeat-item {
+  border-top: 1px solid var(--shell-border);
+}
+
+.docgen-repeat-item:first-child {
+  border-top: 0;
+}
+
+.docgen-repeat-item--compact .docgen-grid {
+  padding-top: 0;
+}
+
+.docgen-repeat-title {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.docgen-repeat-title strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docgen-preview {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--shell-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--shell-main-bg) 88%, transparent);
+  backdrop-filter: blur(18px);
+  overflow: hidden;
+}
+
+.docgen-preview-header {
+  flex: 0 0 auto;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--shell-border);
+}
+
+.docgen-preview-header > div:first-child {
+  min-width: 0;
+}
+
+.docgen-preview-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.docgen-preview-header strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docgen-preview-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.docgen-alert {
+  flex: 0 0 auto;
+  margin: 12px 12px 0;
+}
+
+.docgen-preview-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.docgen-markdown-render {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 18px 20px 26px;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.docgen-markdown-render h1,
+.docgen-markdown-render h2,
+.docgen-markdown-render h3 {
+  margin: 0 0 12px;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.docgen-markdown-render h1 {
+  font-size: 22px;
+}
+
+.docgen-markdown-render h2 {
+  margin-top: 24px;
+  padding-top: 4px;
+  font-size: 18px;
+}
+
+.docgen-markdown-render h3 {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.docgen-markdown-render p {
+  margin: 0 0 12px;
+}
+
+.docgen-markdown-render table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 10px 0 18px;
+  overflow-x: auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.docgen-markdown-render th,
+.docgen-markdown-render td {
+  min-width: 150px;
+  padding: 10px 12px;
+  border: 1px solid var(--shell-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.docgen-markdown-render th {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text-primary);
+  font-weight: 750;
+}
+
+.docgen-markdown-render td {
+  background: color-mix(in srgb, var(--shell-main-bg) 74%, transparent);
+}
+
+.docgen-markdown-render code {
+  border-radius: 6px;
+  padding: 1px 5px;
+  background: color-mix(in srgb, var(--shell-border) 50%, transparent);
+  font-size: 0.92em;
+}
+
+.docgen-markdown-render a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.docgen-markdown-render a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1180px) {
+  .document-generator-page {
+    min-width: 760px;
+  }
+
+  .docgen-body {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .docgen-editor,
+  .docgen-preview {
+    overflow: visible;
+  }
+
+  .docgen-preview {
+    min-height: 520px;
+  }
+
+}
+
+@media (max-width: 860px) {
+  .document-generator-page {
+    min-width: 0;
+  }
+
+  .docgen-header,
+  .docgen-section-header,
+  .docgen-preview-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .docgen-header-actions,
+  .docgen-preview-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .docgen-body,
+  .docgen-header {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+}

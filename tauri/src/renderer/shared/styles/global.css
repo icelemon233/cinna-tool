@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  :root,
+  [data-theme='mint'] {
+    --bg-primary: #d4f0f0;
+    --bg-secondary: #b8e6e6;
+    --bg-card: #ffffff;
+    --bg-card-completed: #e8f8f8;
+    --text-primary: #1a3a3a;
+    --text-secondary: #3d6b6b;
+    --text-muted: #7aabab;
+    --border-color: #a8d8d8;
+    --accent: #2db5b5;
+    --accent-light: rgba(45, 181, 181, 0.12);
+    --topbar-text: #1a3a3a;
+    --topbar-bg: #ffffff;
+    --input-bg: #f0fafa;
+    --btn-inactive-bg: #e0f5f5;
+    --btn-inactive-text: #3d6b6b;
+    --btn-hover-bg: rgba(45, 181, 181, 0.12);
+    --sidebar-bg: #1a3a3a;
+    --sidebar-text: #d4f0f0;
+    --sidebar-active-bg: rgba(45, 181, 181, 0.2);
+    --shell-bg: #d7d7d4;
+    --shell-sidebar-bg: #e4e4e0;
+    --shell-sidebar-text: #242424;
+    --shell-sidebar-muted: #8b8b87;
+    --shell-sidebar-active-bg: rgba(255, 255, 255, 0.72);
+    --shell-main-bg: #fbfbfa;
+    --shell-border: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme='peach'] {
+    --bg-primary: #f0c9bb;
+    --bg-secondary: #e4ad99;
+    --bg-card: #fffaf8;
+    --bg-card-completed: #f7dcd3;
+    --text-primary: #3d2017;
+    --text-secondary: #6b4030;
+    --text-muted: #956b5d;
+    --border-color: #d9aa96;
+    --accent: #c85f35;
+    --accent-light: rgba(200, 95, 53, 0.14);
+    --topbar-text: #3d2017;
+    --topbar-bg: #fffaf8;
+    --input-bg: #fff5f1;
+    --btn-inactive-bg: #f4d4c8;
+    --btn-inactive-text: #6b4030;
+    --btn-hover-bg: rgba(200, 95, 53, 0.14);
+    --sidebar-bg: #3d2017;
+    --sidebar-text: #f8d8ce;
+    --sidebar-active-bg: rgba(200, 95, 53, 0.2);
+  }
+
+  [data-theme='sakura'] {
+    --bg-primary: #ead2e4;
+    --bg-secondary: #ddb6d3;
+    --bg-card: #fff9fd;
+    --bg-card-completed: #f2dfed;
+    --text-primary: #35162e;
+    --text-secondary: #63315a;
+    --text-muted: #98708f;
+    --border-color: #d4aaca;
+    --accent: #b94387;
+    --accent-light: rgba(185, 67, 135, 0.14);
+    --topbar-text: #35162e;
+    --topbar-bg: #fff9fd;
+    --input-bg: #fff3fb;
+    --btn-inactive-bg: #efd6e8;
+    --btn-inactive-text: #63315a;
+    --btn-hover-bg: rgba(185, 67, 135, 0.14);
+    --sidebar-bg: #37172f;
+    --sidebar-text: #f1d6e8;
+    --sidebar-active-bg: rgba(185, 67, 135, 0.2);
+  }
+
+  [data-theme='lavender'] {
+    --bg-primary: #e2dfff;
+    --bg-secondary: #ccc8f0;
+    --bg-card: #ffffff;
+    --bg-card-completed: #f0eeff;
+    --text-primary: #1f1a40;
+    --text-secondary: #3d3570;
+    --text-muted: #7a70b0;
+    --border-color: #c4bef0;
+    --accent: #6b5ce7;
+    --accent-light: rgba(107, 92, 231, 0.12);
+    --topbar-text: #1f1a40;
+    --topbar-bg: #ffffff;
+    --input-bg: #f5f3ff;
+    --btn-inactive-bg: #ece8ff;
+    --btn-inactive-text: #3d3570;
+    --btn-hover-bg: rgba(107, 92, 231, 0.12);
+    --sidebar-bg: #1f1a40;
+    --sidebar-text: #e2dfff;
+    --sidebar-active-bg: rgba(107, 92, 231, 0.2);
+  }
+
+  [data-theme='lemon'] {
+    --bg-primary: #e1d48f;
+    --bg-secondary: #cab95e;
+    --bg-card: #fffdf0;
+    --bg-card-completed: #ece3a6;
+    --text-primary: #352f11;
+    --text-secondary: #665a22;
+    --text-muted: #8a7b3d;
+    --border-color: #bdad55;
+    --accent: #927a00;
+    --accent-light: rgba(146, 122, 0, 0.16);
+    --topbar-text: #352f11;
+    --topbar-bg: #fffdf0;
+    --input-bg: #fffbea;
+    --btn-inactive-bg: #efe5a8;
+    --btn-inactive-text: #665a22;
+    --btn-hover-bg: rgba(146, 122, 0, 0.16);
+    --sidebar-bg: #352f11;
+    --sidebar-text: #f4eab5;
+    --sidebar-active-bg: rgba(146, 122, 0, 0.22);
+  }
+
+  [data-theme='dark'] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #252525;
+    --bg-card: #2a2a2a;
+    --bg-card-completed: #222222;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-muted: #888888;
+    --border-color: #3a3a3a;
+    --accent: #ffffff;
+    --accent-light: rgba(255, 255, 255, 0.08);
+    --topbar-text: #ffffff;
+    --topbar-bg: #1a1a1a;
+    --input-bg: #2a2a2a;
+    --btn-inactive-bg: #333333;
+    --btn-inactive-text: #cccccc;
+    --btn-hover-bg: rgba(255, 255, 255, 0.08);
+    --sidebar-bg: #111111;
+    --sidebar-text: #ffffff;
+    --sidebar-active-bg: rgba(255, 255, 255, 0.12);
+    --shell-bg: #0f0f0f;
+    --shell-sidebar-bg: #151515;
+    --shell-sidebar-text: #ededed;
+    --shell-sidebar-muted: #777777;
+    --shell-sidebar-active-bg: rgba(255, 255, 255, 0.12);
+    --shell-main-bg: #1a1a1a;
+    --shell-border: rgba(255, 255, 255, 0.12);
+  }
+
+  @keyframes pageIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer components {
+  .ant-popover,
+  .ant-popover *,
+  .ant-tooltip,
+  .ant-tooltip *,
+  .ant-dropdown,
+  .ant-dropdown *,
+  .ant-modal-root,
+  .ant-modal-root *,
+  .ant-picker-dropdown,
+  .ant-picker-dropdown *,
+  .ant-select-dropdown,
+  .ant-select-dropdown *,
+  .ant-message,
+  .ant-message *,
+  .ant-notification,
+  .ant-notification * {
+    -webkit-app-region: no-drag;
+  }
+}

@@ -1,0 +1,405 @@
+@layer components {
+  .clipboard-page {
+    height: 100%;
+    min-width: 800px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--shell-main-bg);
+    color: var(--text-primary);
+  }
+
+  .clipboard-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 24px 28px 14px;
+  }
+
+  .clipboard-page.is-floating {
+    min-width: 0;
+    height: 100vh;
+    background: var(--shell-main-bg);
+    opacity: var(--clipboard-floating-opacity, 0.9);
+    transition: opacity 0.16s ease;
+  }
+
+  .clipboard-page.is-floating .clipboard-header {
+    min-height: 56px;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px 8px;
+    border-bottom: 1px solid var(--shell-border);
+    -webkit-app-region: drag;
+  }
+
+  .clipboard-title-wrap {
+    min-width: 0;
+  }
+
+  .clipboard-title-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .clipboard-title-line > .anticon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .clipboard-title {
+    margin: 0 !important;
+    font-size: 24px !important;
+    line-height: 1.3 !important;
+  }
+
+  .clipboard-subtitle {
+    margin: 4px 0 0 !important;
+    color: var(--text-secondary);
+  }
+
+  .clipboard-page.is-floating .clipboard-title-line {
+    gap: 6px;
+  }
+
+  .clipboard-page.is-floating .clipboard-title-line > .anticon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    font-size: 21px;
+  }
+
+  .clipboard-page.is-floating .clipboard-title {
+    font-size: 16px !important;
+  }
+
+  .clipboard-page.is-floating .clipboard-subtitle {
+    display: none;
+  }
+
+  .clipboard-toolbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .clipboard-page.is-floating .clipboard-toolbar,
+  .clipboard-page.is-floating .clipboard-toolbar .ant-btn {
+    -webkit-app-region: no-drag;
+  }
+
+  .clipboard-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+    gap: 18px;
+    overflow: auto;
+    padding: 0 28px 28px;
+  }
+
+  .clipboard-page.is-floating .clipboard-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+    padding: 10px;
+  }
+
+  .clipboard-compose-panel,
+  .clipboard-list-panel {
+    min-width: 0;
+    border: 1px solid var(--shell-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--shell-main-bg) 84%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .clipboard-compose-panel {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto auto minmax(220px, 1fr);
+    gap: 12px;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .clipboard-compose-panel .clipboard-panel-header {
+    min-height: 40px;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .clipboard-compose-panel .clipboard-panel-title {
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+  }
+
+  .clipboard-compose-panel .ant-btn-primary {
+    height: 40px !important;
+    padding: 0 18px !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    font-weight: 700;
+  }
+
+  .clipboard-list-panel {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .clipboard-page.is-floating .clipboard-list-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .clipboard-panel-header {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--shell-border);
+  }
+
+  .clipboard-panel-title {
+    margin: 0 !important;
+    color: var(--text-primary) !important;
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+  }
+
+  .clipboard-page.is-floating .clipboard-panel-header {
+    min-height: 40px;
+    padding: 10px 12px;
+  }
+
+  .clipboard-page.is-floating .clipboard-panel-title {
+    font-size: 14px !important;
+  }
+
+  .clipboard-count {
+    flex: 0 0 auto;
+    font-size: 12px;
+  }
+
+  .clipboard-note-input.ant-input {
+    height: 40px;
+    border: 1px solid var(--shell-border) !important;
+    border-radius: 8px !important;
+    background: color-mix(in srgb, var(--shell-main-bg) 92%, var(--bg-card)) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    padding: 0 14px;
+  }
+
+  .clipboard-note-input.ant-input:hover,
+  .clipboard-note-input.ant-input:focus {
+    border-color: color-mix(in srgb, var(--accent) 58%, var(--shell-border)) !important;
+    box-shadow: 0 0 0 2px var(--accent-light) !important;
+  }
+
+  .clipboard-draft-input.ant-input {
+    height: 100% !important;
+    min-height: 220px;
+    border: 1px solid var(--shell-border) !important;
+    border-radius: 8px !important;
+    background: color-mix(in srgb, var(--shell-main-bg) 92%, var(--bg-card)) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+    resize: none;
+    padding: 12px 14px;
+  }
+
+  .clipboard-draft-input.ant-input:hover,
+  .clipboard-draft-input.ant-input:focus {
+    border-color: color-mix(in srgb, var(--accent) 58%, var(--shell-border)) !important;
+    box-shadow: 0 0 0 2px var(--accent-light) !important;
+  }
+
+  .clipboard-note-input.ant-input::placeholder,
+  .clipboard-draft-input.ant-input::placeholder {
+    color: color-mix(in srgb, var(--text-secondary) 68%, transparent);
+  }
+
+  .clipboard-page.is-floating .clipboard-compose-panel {
+    flex: 0 0 236px;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .clipboard-page.is-floating .clipboard-compose-panel .clipboard-panel-header {
+    min-height: 32px;
+    padding: 0;
+  }
+
+  .clipboard-page.is-floating .clipboard-compose-panel .ant-btn-primary {
+    height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 13px;
+  }
+
+  .clipboard-page.is-floating .clipboard-draft-input.ant-input {
+    min-height: 0;
+  }
+
+  .clipboard-empty {
+    flex: 1;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .clipboard-grid {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 10px;
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .clipboard-body,
+  .clipboard-grid {
+    scrollbar-width: none;
+  }
+
+  .clipboard-body::-webkit-scrollbar,
+  .clipboard-grid::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+
+  .clipboard-page.is-floating .clipboard-grid {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .clipboard-item {
+    position: relative;
+    min-width: 118px;
+    max-width: 220px;
+    height: 44px;
+    display: inline-grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    border: 1px solid var(--shell-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 86%, transparent);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  }
+
+  .clipboard-page.is-floating .clipboard-item {
+    min-width: 120px;
+    max-width: 132px;
+    height: 40px;
+  }
+
+  .clipboard-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--shell-border));
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .clipboard-item.is-copied {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light);
+  }
+
+  .clipboard-copy-button {
+    min-width: 0;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    padding: 0 12px;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .clipboard-copy-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .clipboard-copy-button > .anticon {
+    flex: 0 0 auto;
+    color: var(--accent);
+  }
+
+  .clipboard-copy-button > span:last-child {
+    min-width: 0;
+    max-width: 156px;
+    overflow: hidden;
+    color: var(--text-primary);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .clipboard-page.is-floating .clipboard-copy-button {
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .clipboard-page.is-floating .clipboard-copy-button > span:last-child {
+    max-width: 78px;
+    font-size: 13px;
+  }
+
+  .clipboard-item-actions {
+    display: inline-flex;
+    align-items: center;
+    padding-right: 6px;
+  }
+
+  .clipboard-page.is-floating .clipboard-item-actions {
+    padding-right: 3px;
+  }
+
+  .clipboard-page.is-floating .clipboard-item-actions .ant-btn {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+  }
+
+  @media (max-width: 980px) {
+    .clipboard-body {
+      grid-template-columns: 1fr;
+    }
+
+    .clipboard-compose-panel {
+      min-height: 360px;
+    }
+
+    .clipboard-page.is-floating .clipboard-compose-panel {
+      min-height: 0;
+    }
+  }
+}

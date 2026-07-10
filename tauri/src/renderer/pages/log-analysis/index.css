@@ -1,0 +1,1959 @@
+@layer components {
+  .log-analysis-page {
+    --log-analysis-red: #f05b5b;
+    --log-analysis-green: #3ccf72;
+    height: 100%;
+    min-width: 800px;
+    display: none;
+    overflow: hidden;
+    background: var(--shell-main-bg);
+    color: var(--text-primary);
+  }
+
+  [data-theme='dark'] .log-analysis-page {
+    --accent: #6aa8ff;
+    --accent-light: rgba(106, 168, 255, 0.14);
+  }
+
+  .log-analysis-page.is-active {
+    display: flex;
+    animation: pageIn 0.2s ease;
+  }
+
+  .log-analysis-control {
+    width: 324px;
+    min-width: 324px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 24px 18px;
+    overflow: auto;
+    border-right: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--shell-main-bg) 88%, var(--bg-card));
+  }
+
+  .log-analysis-control-head {
+    min-width: 0;
+  }
+
+  .log-analysis-title-line {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+
+  .log-analysis-title-line > .anticon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    font-size: 28px;
+  }
+
+  .log-analysis-title-line .ant-typography {
+    margin: 0 !important;
+  }
+
+  .log-analysis-control-head .ant-typography + .ant-typography {
+    margin: 4px 0 0 !important;
+  }
+
+  .log-analysis-mode {
+    flex: 0 0 auto;
+  }
+
+  .log-analysis-ai-settings-card {
+    width: 100%;
+    min-height: 72px;
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 84%, transparent);
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  }
+
+  .log-analysis-ai-settings-card:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent-light) 44%, var(--bg-card));
+    transform: translateY(-1px);
+  }
+
+  .log-analysis-ai-settings-card > .anticon {
+    color: var(--text-primary);
+    font-size: 18px;
+  }
+
+  .log-analysis-ai-settings-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .log-analysis-ai-settings-main strong {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .log-analysis-ai-settings-main span {
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-ai-settings-side {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .log-analysis-ai-settings-side .ant-tag {
+    margin-inline-end: 0;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .log-analysis-ai-settings-side .is-ready {
+    color: var(--log-analysis-green);
+    border-color: color-mix(in srgb, var(--log-analysis-green) 42%, var(--border-color));
+    background: color-mix(in srgb, var(--log-analysis-green) 12%, var(--bg-card));
+  }
+
+  .log-analysis-ai-settings-side .is-missing {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background: color-mix(in srgb, var(--bg-card) 84%, transparent);
+  }
+
+  .log-analysis-drop-zone {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 16px;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+    text-align: center;
+    transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  }
+
+  .log-analysis-drop-zone.is-dragging {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    transform: translateY(-1px);
+  }
+
+  .log-analysis-drop-zone > .anticon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent-light) 70%, transparent);
+    color: var(--accent);
+    font-size: 28px;
+  }
+
+  .log-analysis-drop-zone strong {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+  }
+
+  .log-analysis-drop-zone span {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .log-analysis-file-input {
+    display: none;
+  }
+
+  .log-analysis-progress-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  }
+
+  .log-analysis-page .ant-tag {
+    border-color: color-mix(in srgb, var(--accent) 28%, var(--border-color));
+    background: color-mix(in srgb, var(--accent-light) 56%, transparent);
+    color: var(--text-secondary);
+  }
+
+  .log-analysis-page .ant-btn-primary {
+    border-color: var(--accent) !important;
+    background: var(--accent) !important;
+    color: var(--bg-card) !important;
+  }
+
+  .log-analysis-page .ant-btn-primary:not(:disabled):hover {
+    border-color: color-mix(in srgb, var(--accent) 84%, var(--text-primary)) !important;
+    background: color-mix(in srgb, var(--accent) 84%, var(--text-primary)) !important;
+    color: var(--bg-card) !important;
+  }
+
+  .log-analysis-progress-card .ant-progress-inner {
+    background: color-mix(in srgb, var(--border-color) 32%, transparent);
+  }
+
+  .log-analysis-progress-card .ant-progress-bg,
+  .log-analysis-progress-card .ant-progress-success-bg,
+  .log-analysis-progress-card .ant-progress-track {
+    background: var(--log-analysis-green) !important;
+  }
+
+  .log-analysis-progress-card .ant-progress-text,
+  .log-analysis-progress-card .ant-progress-indicator,
+  .log-analysis-progress-card .anticon {
+    color: var(--log-analysis-green) !important;
+    border-color: var(--log-analysis-green) !important;
+  }
+
+  .log-analysis-page .ant-alert {
+    border-color: var(--border-color) !important;
+    background: color-mix(in srgb, var(--accent-light) 42%, var(--bg-card)) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .log-analysis-page .ant-alert-icon {
+    color: var(--accent) !important;
+  }
+
+  .log-analysis-page .ant-alert-message {
+    color: var(--text-primary);
+  }
+
+  .log-analysis-page .ant-alert-description {
+    color: var(--text-secondary);
+  }
+
+  .log-analysis-progress-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .log-analysis-progress-meta {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .log-analysis-run-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .log-analysis-privacy-note {
+    border-radius: 8px;
+  }
+
+  .log-analysis-main {
+    min-width: 0;
+    flex: 1;
+    overflow: auto;
+  }
+
+  .log-analysis-empty-report {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+  }
+
+  .log-analysis-report {
+    --diagnostic-bg: color-mix(in srgb, var(--shell-main-bg) 92%, var(--bg-card));
+    --diagnostic-panel: color-mix(in srgb, var(--bg-card) 88%, var(--shell-main-bg));
+    --diagnostic-panel-strong: color-mix(in srgb, var(--bg-card) 76%, var(--accent-light));
+    --diagnostic-border: color-mix(in srgb, var(--border-color) 78%, var(--text-primary));
+    --diagnostic-border-soft: color-mix(in srgb, var(--border-color) 66%, transparent);
+    --diagnostic-title: var(--text-primary);
+    --diagnostic-text: var(--text-primary);
+    --diagnostic-muted: var(--text-secondary);
+    --diagnostic-subtle: var(--text-muted);
+    --diagnostic-accent: var(--accent);
+    --diagnostic-accent-soft: var(--accent-light);
+    --diagnostic-accent-bg: color-mix(in srgb, var(--accent-light) 72%, var(--diagnostic-panel));
+    --diagnostic-accent-bg-strong: color-mix(in srgb, var(--accent) 18%, var(--diagnostic-panel));
+    --diagnostic-accent-border: color-mix(in srgb, var(--accent) 44%, var(--diagnostic-border));
+    --diagnostic-accent-border-strong: color-mix(in srgb, var(--accent) 68%, var(--diagnostic-border));
+    --diagnostic-red: var(--log-analysis-red);
+    --diagnostic-red-bg: color-mix(in srgb, var(--diagnostic-red) 16%, var(--diagnostic-panel));
+    --diagnostic-red-bg-strong: color-mix(in srgb, var(--diagnostic-red) 24%, var(--diagnostic-panel));
+    --diagnostic-red-border: color-mix(in srgb, var(--diagnostic-red) 64%, var(--diagnostic-border));
+    --diagnostic-green: var(--log-analysis-green);
+    --diagnostic-green-bg: color-mix(in srgb, var(--diagnostic-green) 14%, var(--diagnostic-panel));
+    --diagnostic-green-bg-strong: color-mix(in srgb, var(--diagnostic-green) 22%, var(--diagnostic-panel));
+    --diagnostic-green-border: color-mix(in srgb, var(--diagnostic-green) 58%, var(--diagnostic-border));
+    --diagnostic-track-bg: color-mix(in srgb, var(--border-color) 16%, transparent);
+    --diagnostic-danger-border: var(--diagnostic-red-border);
+    --diagnostic-danger-bg: var(--diagnostic-red-bg);
+    max-width: 1320px;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 0 auto;
+    padding: 24px 28px 36px;
+    color: var(--diagnostic-text);
+  }
+
+  .log-analysis-report-alert {
+    margin-bottom: 18px;
+    border-radius: 8px;
+  }
+
+  .log-analysis-report-section {
+    padding: 24px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 12px;
+    background: var(--diagnostic-bg);
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--text-primary) 8%, transparent);
+  }
+
+  .log-analysis-report-section:first-of-type {
+    padding-top: 24px;
+  }
+
+  .log-analysis-report-section:last-child {
+    border-bottom: 1px solid var(--diagnostic-border-soft);
+  }
+
+  .log-analysis-section-header {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .log-analysis-section-header .ant-typography {
+    margin: 0 !important;
+    color: var(--diagnostic-title) !important;
+    font-weight: 800;
+  }
+
+  .log-analysis-section-title-wrap {
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-left: 12px;
+    border-left: 4px solid var(--diagnostic-accent);
+  }
+
+  .log-analysis-section-title-wrap > span {
+    min-width: 0;
+    color: var(--diagnostic-muted);
+    font-size: 13px;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-diagnostic-pill {
+    margin-inline-end: 0;
+    border: 0;
+    border-radius: 6px;
+    background: var(--diagnostic-accent-bg);
+    color: var(--diagnostic-text);
+    font-weight: 700;
+  }
+
+  .log-analysis-view-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+
+  .log-analysis-view-switch .ant-segmented {
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 7px;
+    background: var(--diagnostic-track-bg);
+    color: var(--diagnostic-muted);
+  }
+
+  .log-analysis-view-switch .ant-segmented-item {
+    border-radius: 6px;
+  }
+
+  .log-analysis-view-switch .ant-segmented-item-selected {
+    background: var(--diagnostic-accent-bg-strong);
+    color: var(--diagnostic-title);
+  }
+
+  .log-analysis-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .log-analysis-metric-card {
+    min-width: 0;
+    min-height: 86px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 12px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-metric-card.is-warn {
+    border-color: var(--diagnostic-accent-border);
+    background: var(--diagnostic-accent-bg);
+  }
+
+  .log-analysis-metric-card.is-bad {
+    border-color: var(--diagnostic-danger-border);
+    background: var(--diagnostic-danger-bg);
+  }
+
+  .log-analysis-metric-label,
+  .log-analysis-metric-detail {
+    color: var(--diagnostic-subtle);
+    font-size: 12px;
+  }
+
+  .log-analysis-metric-card strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--diagnostic-title);
+  }
+
+  .log-analysis-launch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .log-analysis-launch {
+    min-width: 0;
+    border: 1px solid var(--diagnostic-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-launch.is-timeline {
+    padding: 26px 22px 22px;
+    overflow: visible;
+  }
+
+  .log-analysis-launch-head {
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--diagnostic-border-soft);
+  }
+
+  .log-analysis-launch-head > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .log-analysis-launch-head span {
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+  }
+
+  .log-analysis-milestone-timeline {
+    --milestone-time-width: 132px;
+    --milestone-node-width: 28px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 4px 0;
+  }
+
+  .log-analysis-milestone-timeline::before {
+    content: '';
+    position: absolute;
+    top: 50px;
+    bottom: 18px;
+    left: calc(var(--milestone-time-width) + var(--milestone-node-width) / 2 - 1px);
+    width: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--diagnostic-border) 70%, transparent);
+  }
+
+  .log-analysis-timeline-head {
+    display: grid;
+    grid-template-columns:
+      var(--milestone-time-width)
+      var(--milestone-node-width)
+      minmax(240px, 0.75fr)
+      minmax(300px, 1.25fr);
+    align-items: center;
+    min-height: 34px;
+    margin-bottom: 6px;
+  }
+
+  .log-analysis-timeline-head strong {
+    min-width: 0;
+    color: var(--diagnostic-title);
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: 0;
+  }
+
+  .log-analysis-timeline-head strong:last-child {
+    color: var(--diagnostic-title);
+  }
+
+  .log-analysis-milestone-row {
+    position: relative;
+    display: grid;
+    grid-template-columns:
+      var(--milestone-time-width)
+      var(--milestone-node-width)
+      minmax(240px, 0.75fr)
+      minmax(300px, 1.25fr);
+    align-items: start;
+    min-height: 64px;
+    column-gap: 0;
+    padding: 4px 0;
+  }
+
+  .log-analysis-milestone-row time {
+    padding-top: 3px;
+    color: var(--diagnostic-text);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  .log-analysis-milestone-dot {
+    position: relative;
+    z-index: 1;
+    width: 11px;
+    height: 11px;
+    margin: 9px auto 0;
+    border-radius: 50%;
+  }
+
+  .log-analysis-milestone-dot.is-sync {
+    background: var(--diagnostic-red);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--diagnostic-red) 18%, transparent);
+  }
+
+  .log-analysis-milestone-dot.is-async {
+    background: var(--diagnostic-green);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--diagnostic-green) 14%, transparent);
+  }
+
+  .log-analysis-milestone-content {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-top: 1px;
+  }
+
+  .log-analysis-milestone-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .log-analysis-milestone-main strong {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--diagnostic-text);
+    font-size: 15px;
+    font-weight: 850;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-milestone-duration,
+  .log-analysis-milestone-type,
+  .log-analysis-milestone-category {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 22px;
+    white-space: nowrap;
+  }
+
+  .log-analysis-milestone-type {
+    min-width: 42px;
+  }
+
+  .log-analysis-milestone-duration {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-milestone-type.is-sync {
+    color: var(--diagnostic-red);
+    background: var(--diagnostic-red-bg);
+  }
+
+  .log-analysis-milestone-type.is-async {
+    color: var(--diagnostic-green);
+    background: var(--diagnostic-green-bg);
+  }
+
+  .log-analysis-milestone-category {
+    color: var(--diagnostic-muted);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-milestone-category.is-main {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-milestone-category.is-window {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-milestone-category.is-network {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-milestone-category.is-printer {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-milestone-category.is-failure {
+    color: var(--diagnostic-red);
+    background: var(--diagnostic-red-bg);
+  }
+
+  .log-analysis-stage-candidate-button {
+    box-sizing: border-box;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    border: 1px solid var(--diagnostic-accent-border);
+    border-radius: 5px;
+    background: var(--diagnostic-panel);
+    color: var(--diagnostic-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 850;
+    line-height: 20px;
+    white-space: nowrap;
+  }
+
+  .log-analysis-stage-candidate-button:hover,
+  .log-analysis-stage-candidate-button.is-confirmed {
+    border-color: var(--diagnostic-accent-border-strong);
+    background: var(--diagnostic-accent-bg);
+  }
+
+  .log-analysis-milestone-content p {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-async-branch {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 0 0 6px 16px;
+  }
+
+  .log-analysis-async-item {
+    position: relative;
+    min-width: 0;
+    padding: 8px 10px 8px 12px;
+    border: 1px solid var(--diagnostic-green-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--diagnostic-green) 8%, var(--diagnostic-panel));
+  }
+
+  .log-analysis-async-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .log-analysis-async-time {
+    color: var(--diagnostic-green);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .log-analysis-async-dot {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    border-radius: 50%;
+    background: var(--diagnostic-green);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--diagnostic-green) 14%, transparent);
+  }
+
+  .log-analysis-async-main strong {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--diagnostic-title);
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-async-item p {
+    min-width: 0;
+    margin: 5px 0 0;
+    overflow: hidden;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-gantt {
+    --gantt-label-width: 190px;
+    --gantt-info-width: 210px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .log-analysis-gantt-axis {
+    display: grid;
+    grid-template-columns: var(--gantt-label-width) minmax(260px, 1fr) var(--gantt-info-width);
+    align-items: end;
+    min-height: 34px;
+    gap: 14px;
+    padding-right: 8px;
+  }
+
+  .log-analysis-gantt-axis-track {
+    position: relative;
+    height: 28px;
+    border-bottom: 1px solid var(--diagnostic-border);
+  }
+
+  .log-analysis-gantt-axis-track span {
+    position: absolute;
+    bottom: 9px;
+    transform: translateX(-50%);
+    color: var(--diagnostic-muted);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .log-analysis-gantt-axis-track span::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 1px;
+    height: 8px;
+    background: var(--diagnostic-border);
+  }
+
+  .log-analysis-gantt-row {
+    display: grid;
+    grid-template-columns: var(--gantt-label-width) minmax(260px, 1fr) var(--gantt-info-width);
+    align-items: center;
+    gap: 14px;
+    min-height: 44px;
+    padding: 5px 8px 5px 0;
+  }
+
+  .log-analysis-gantt-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: right;
+  }
+
+  .log-analysis-gantt-meta strong {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--diagnostic-title);
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-gantt-meta span {
+    overflow: hidden;
+    color: var(--diagnostic-muted);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-gantt-track {
+    position: relative;
+    height: 28px;
+    overflow: visible;
+    border-radius: 5px;
+    background:
+      repeating-linear-gradient(
+        to right,
+        color-mix(in srgb, var(--diagnostic-border) 26%, transparent) 0,
+        color-mix(in srgb, var(--diagnostic-border) 26%, transparent) 1px,
+        transparent 1px,
+        transparent 10%
+      );
+  }
+
+  .log-analysis-gantt-bar {
+    position: absolute;
+    top: 7px;
+    height: 16px;
+    min-width: 18px;
+    border-radius: 5px;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--text-primary) 14%, transparent);
+  }
+
+  .log-analysis-gantt-bar.is-sync,
+  .log-analysis-gantt-legend i.is-sync {
+    background: var(--diagnostic-red);
+  }
+
+  .log-analysis-gantt-bar.is-async,
+  .log-analysis-gantt-legend i.is-async {
+    background: var(--diagnostic-green);
+  }
+
+  .log-analysis-gantt-duration {
+    position: absolute;
+    top: 5px;
+    transform: translateX(10px);
+    color: var(--diagnostic-muted);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 18px;
+    white-space: nowrap;
+  }
+
+  .log-analysis-gantt-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .log-analysis-gantt-badges {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .log-analysis-gantt-info p {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--diagnostic-muted);
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-gantt-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding-top: 10px;
+  }
+
+  .log-analysis-gantt-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--diagnostic-muted);
+    font-size: 13px;
+    font-weight: 750;
+  }
+
+  .log-analysis-gantt-legend i {
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    border-radius: 3px;
+  }
+
+  .log-analysis-stage-confirm-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--diagnostic-accent-border);
+    border-radius: 8px;
+    background: var(--diagnostic-accent-bg);
+  }
+
+  .log-analysis-stage-confirm-card span {
+    min-width: 0;
+    color: var(--diagnostic-text);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  .log-analysis-stage-confirm-card button,
+  .log-analysis-stage-dialog header button {
+    flex: 0 0 auto;
+    border: 1px solid var(--diagnostic-accent-border);
+    border-radius: 6px;
+    background: var(--diagnostic-panel);
+    color: var(--diagnostic-accent);
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 850;
+  }
+
+  .log-analysis-stage-confirm-card button {
+    height: 30px;
+    padding: 0 12px;
+  }
+
+  .log-analysis-stage-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background: color-mix(in srgb, var(--text-primary) 34%, transparent);
+  }
+
+  .log-analysis-stage-dialog {
+    width: min(820px, 100%);
+    max-height: min(720px, calc(100vh - 56px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--diagnostic-border);
+    border-radius: 10px;
+    background: var(--diagnostic-bg);
+    box-shadow: 0 18px 56px color-mix(in srgb, var(--text-primary) 20%, transparent);
+  }
+
+  .log-analysis-stage-dialog header {
+    min-height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--diagnostic-border-soft);
+  }
+
+  .log-analysis-stage-dialog header > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .log-analysis-stage-dialog header span {
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .log-analysis-stage-dialog header strong {
+    color: var(--diagnostic-title);
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .log-analysis-stage-dialog header button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .log-analysis-stage-candidate-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: auto;
+    padding: 14px;
+  }
+
+  .log-analysis-stage-candidate-option {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 12px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+    background: var(--diagnostic-panel);
+    color: var(--diagnostic-text);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+
+  .log-analysis-stage-candidate-option:hover,
+  .log-analysis-stage-candidate-option.is-selected {
+    border-color: var(--diagnostic-accent-border-strong);
+    background: var(--diagnostic-accent-bg);
+  }
+
+  .log-analysis-stage-candidate-meta {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .log-analysis-stage-candidate-meta time,
+  .log-analysis-stage-candidate-meta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border-radius: 5px;
+    background: var(--diagnostic-track-bg);
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 22px;
+    white-space: nowrap;
+  }
+
+  .log-analysis-stage-candidate-meta time {
+    color: var(--diagnostic-text);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+
+  .log-analysis-stage-candidate-option strong {
+    color: var(--diagnostic-title);
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .log-analysis-stage-candidate-option p {
+    margin: 0;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .log-analysis-operation-tag {
+    box-sizing: border-box;
+    min-width: 44px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 9px;
+    margin-inline-end: 0;
+    border: 1px solid transparent;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 850;
+    line-height: 24px;
+  }
+
+  .log-analysis-operation-tag.is-sync {
+    color: var(--diagnostic-red);
+    border-color: var(--diagnostic-red-border);
+    background: var(--diagnostic-red-bg);
+  }
+
+  .log-analysis-operation-tag.is-async {
+    color: var(--diagnostic-green);
+    border-color: var(--diagnostic-green-border);
+    background: var(--diagnostic-green-bg);
+  }
+
+  .log-analysis-subsection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .log-analysis-subsection:first-child {
+    margin-top: 0;
+  }
+
+  .log-analysis-subsection .ant-typography {
+    margin: 0 !important;
+    color: var(--diagnostic-text);
+  }
+
+  .log-analysis-subsection.is-diagnostic {
+    margin-top: 18px;
+    padding-top: 2px;
+  }
+
+  .log-analysis-table-wrap {
+    width: fit-content;
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+  }
+
+  .log-analysis-table {
+    width: 560px;
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-table-col-stage {
+    width: 330px;
+  }
+
+  .log-analysis-table-col-type {
+    width: 92px;
+  }
+
+  .log-analysis-table-col-duration {
+    width: 138px;
+  }
+
+  .log-analysis-table th,
+  .log-analysis-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--diagnostic-border-soft);
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+
+  .log-analysis-table th {
+    color: var(--diagnostic-muted);
+    font-weight: 600;
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-table th:not(:first-child),
+  .log-analysis-table td:not(:first-child) {
+    text-align: center;
+  }
+
+  .log-analysis-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .log-analysis-table td:first-child span {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-ai-summary {
+    margin: 0;
+    padding: 10px 12px;
+    border-left: 4px solid var(--diagnostic-accent);
+    border-radius: 8px;
+    background: var(--diagnostic-accent-bg);
+    color: var(--diagnostic-text);
+    font-weight: 650;
+  }
+
+  .log-analysis-issue-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .log-analysis-issue {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 140px;
+    padding: 18px 20px;
+    border: 1px solid var(--diagnostic-border);
+    border-radius: 12px;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-issue.is-p0 {
+    border-color: var(--diagnostic-red-border);
+  }
+
+  .log-analysis-issue.is-p1 {
+    border-color: var(--diagnostic-border);
+  }
+
+  .log-analysis-issue.is-p2 {
+    border-color: var(--diagnostic-accent-border);
+  }
+
+  .log-analysis-issue-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .log-analysis-issue-title strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--diagnostic-text);
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .log-analysis-issue p {
+    margin: 0;
+    color: var(--diagnostic-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .log-analysis-issue p span,
+  .log-analysis-suggestion {
+    color: var(--diagnostic-text) !important;
+    font-weight: 800;
+  }
+
+  .log-analysis-issue .log-analysis-evidence {
+    color: var(--diagnostic-text);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .log-analysis-priority {
+    width: 36px;
+    min-width: 36px;
+    text-align: center;
+    border-radius: 5px;
+    margin-inline-end: 0;
+    border: 0;
+    font-weight: 850;
+  }
+
+  .log-analysis-priority.is-p0 {
+    color: var(--diagnostic-red);
+    background: var(--diagnostic-red-bg);
+  }
+
+  .log-analysis-priority.is-p1 {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-priority.is-p2 {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-network-diagnosis {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--diagnostic-panel) 74%, transparent);
+  }
+
+  .log-analysis-network-diagnosis-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .log-analysis-network-diagnosis-head > div {
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .log-analysis-network-diagnosis-head .ant-typography {
+    margin: 0 !important;
+    color: var(--diagnostic-title);
+  }
+
+  .log-analysis-network-diagnosis-head span {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-network-diagnosis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .log-analysis-network-diagnosis-card {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(150px, 0.42fr) minmax(0, 0.58fr);
+    grid-template-areas:
+      "title detail"
+      "value detail";
+    gap: 8px 14px;
+    min-height: 116px;
+    padding: 14px 16px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-network-diagnosis-card.is-warn {
+    border-color: var(--diagnostic-accent-border);
+    background: var(--diagnostic-accent-bg);
+  }
+
+  .log-analysis-network-diagnosis-card.is-bad {
+    border-color: var(--diagnostic-danger-border);
+    background: var(--diagnostic-danger-bg);
+  }
+
+  .log-analysis-network-diagnosis-title {
+    grid-area: title;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--diagnostic-muted);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .log-analysis-network-diagnosis-title .anticon {
+    color: var(--diagnostic-text);
+    font-size: 16px;
+  }
+
+  .log-analysis-network-diagnosis-value {
+    grid-area: value;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .log-analysis-network-diagnosis-value strong {
+    color: var(--diagnostic-title);
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  .log-analysis-network-diagnosis-value span {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .log-analysis-network-diagnosis-card p {
+    grid-area: detail;
+    align-self: center;
+    min-width: 0;
+    margin: 0;
+    color: var(--diagnostic-muted);
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .log-analysis-network-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .log-analysis-network-block {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .log-analysis-network-block-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-left: 12px;
+    border-left: 4px solid var(--diagnostic-accent);
+  }
+
+  .log-analysis-network-block-head .ant-typography {
+    margin: 0 !important;
+    color: var(--diagnostic-title);
+  }
+
+  .log-analysis-network-block-head span {
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .log-analysis-network-empty-state {
+    padding: 16px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+    background: var(--diagnostic-panel);
+    color: var(--diagnostic-muted);
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .log-analysis-layer-ratio-bar {
+    position: relative;
+    height: 40px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-layer-ratio-segment {
+    min-width: 2px;
+    height: 100%;
+    flex: 0 1 auto;
+  }
+
+  .log-analysis-layer-ratio-label {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    box-sizing: border-box;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: calc(100% - 24px);
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: var(--bg-card);
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.25;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+
+  .log-analysis-layer-ratio-label.is-compact {
+    transform: translateY(-50%);
+  }
+
+  .log-analysis-layer-ratio-label.is-network {
+    background: color-mix(in srgb, var(--diagnostic-red) 88%, transparent);
+  }
+
+  .log-analysis-layer-ratio-label.is-business {
+    background: color-mix(in srgb, var(--diagnostic-accent) 82%, var(--diagnostic-panel));
+  }
+
+  .log-analysis-layer-ratio-segment.is-network,
+  .log-analysis-failure-track .is-network {
+    background: var(--diagnostic-red);
+  }
+
+  .log-analysis-layer-ratio-segment.is-business,
+  .log-analysis-failure-track .is-business {
+    background: color-mix(in srgb, var(--diagnostic-accent) 72%, var(--diagnostic-panel));
+  }
+
+  .log-analysis-layer-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 22px;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .log-analysis-layer-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .log-analysis-layer-legend i {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 3px;
+  }
+
+  .log-analysis-layer-legend i.is-network {
+    background: var(--diagnostic-red);
+  }
+
+  .log-analysis-layer-legend i.is-business {
+    background: color-mix(in srgb, var(--diagnostic-accent) 72%, var(--diagnostic-panel));
+  }
+
+  .log-analysis-failure-bars,
+  .log-analysis-network-table-wrap {
+    padding: 16px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 10px;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-failure-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .log-analysis-failure-bar-row {
+    display: grid;
+    grid-template-columns: max-content minmax(180px, 1fr) 62px;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .log-analysis-failure-code {
+    min-width: 0;
+    color: var(--diagnostic-text);
+    font-size: 13px;
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .log-analysis-failure-track {
+    height: 26px;
+    overflow: hidden;
+    border-radius: 5px;
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-failure-track span {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: var(--bg-card);
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .log-analysis-failure-percent {
+    color: var(--diagnostic-muted);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .log-analysis-network-table-wrap {
+    overflow: auto;
+    padding: 0;
+  }
+
+  .log-analysis-network-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-network-table th,
+  .log-analysis-network-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--diagnostic-border-soft);
+    color: var(--diagnostic-text);
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .log-analysis-network-table th {
+    color: var(--diagnostic-muted);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-network-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .log-analysis-network-table code {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: var(--diagnostic-track-bg);
+    color: var(--diagnostic-text);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 850;
+    white-space: nowrap;
+  }
+
+  .log-analysis-layer-tag,
+  .log-analysis-startup-result {
+    box-sizing: border-box;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .log-analysis-layer-tag.is-network {
+    color: var(--diagnostic-red);
+    background: var(--diagnostic-red-bg);
+  }
+
+  .log-analysis-layer-tag.is-business {
+    color: var(--diagnostic-text);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-startup-result.is-success {
+    color: var(--diagnostic-green);
+    background: var(--diagnostic-green-bg);
+  }
+
+  .log-analysis-startup-result.is-failed {
+    color: var(--diagnostic-red);
+    background: var(--diagnostic-red-bg);
+  }
+
+  .log-analysis-startup-result.is-unknown {
+    color: var(--diagnostic-muted);
+    background: var(--diagnostic-track-bg);
+  }
+
+  .log-analysis-network-events {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .log-analysis-network-event {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 108px 132px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    padding: 9px 10px;
+    border: 1px solid var(--diagnostic-border-soft);
+    border-radius: 8px;
+    background: var(--diagnostic-panel);
+  }
+
+  .log-analysis-network-event.is-warn {
+    border-color: var(--diagnostic-accent-border);
+  }
+
+  .log-analysis-network-event.is-error {
+    border-color: var(--diagnostic-red-border);
+  }
+
+  .log-analysis-network-event > span {
+    color: var(--diagnostic-muted);
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 24px;
+  }
+
+  .log-analysis-network-event .ant-tag {
+    min-width: 70px;
+    max-width: none;
+    margin: 0;
+    overflow: visible;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .log-analysis-network-event p {
+    min-width: 0;
+    margin: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    color: var(--diagnostic-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    text-overflow: clip;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  @media (max-width: 1040px) {
+    .log-analysis-page {
+      min-width: 680px;
+    }
+
+    .log-analysis-control {
+      width: 292px;
+      min-width: 292px;
+    }
+
+    .log-analysis-metric-grid,
+    .log-analysis-issue-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .log-analysis-network-diagnosis-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .log-analysis-network-diagnosis-card {
+      grid-template-columns: minmax(140px, 0.36fr) minmax(0, 0.64fr);
+    }
+
+    .log-analysis-failure-bar-row {
+      grid-template-columns: max-content minmax(160px, 1fr) 58px;
+    }
+
+    .log-analysis-milestone-timeline {
+      --milestone-time-width: 116px;
+    }
+
+    .log-analysis-timeline-head,
+    .log-analysis-milestone-row {
+      grid-template-columns: var(--milestone-time-width) var(--milestone-node-width) minmax(0, 1fr);
+    }
+
+    .log-analysis-timeline-head strong:last-child {
+      grid-column: 3;
+      margin-top: 3px;
+      font-size: 12px;
+    }
+
+    .log-analysis-timeline-head {
+      align-items: start;
+    }
+
+    .log-analysis-gantt {
+      --gantt-label-width: 160px;
+      --gantt-info-width: 170px;
+    }
+
+    .log-analysis-async-branch {
+      grid-column: 3;
+      padding-top: 8px;
+      padding-left: 0;
+    }
+
+    .log-analysis-network-event {
+      grid-template-columns: 96px 118px minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 799px) {
+    .log-analysis-page {
+      min-width: 560px;
+      overflow: auto;
+      flex-direction: column;
+    }
+
+    .log-analysis-control {
+      width: 100%;
+      min-width: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .log-analysis-main {
+      overflow: visible;
+    }
+
+    .log-analysis-report {
+      padding: 20px 18px 30px;
+    }
+
+    .log-analysis-metric-grid,
+    .log-analysis-issue-list,
+    .log-analysis-network-diagnosis-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .log-analysis-network-event {
+      grid-template-columns: 1fr;
+    }
+
+    .log-analysis-network-event .ant-tag {
+      width: fit-content;
+    }
+
+    .log-analysis-network-diagnosis-head > div,
+    .log-analysis-network-diagnosis-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .log-analysis-network-block-head {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .log-analysis-failure-bar-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .log-analysis-failure-code {
+      text-align: left;
+    }
+
+    .log-analysis-section-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .log-analysis-gantt {
+      --gantt-label-width: 122px;
+    }
+
+    .log-analysis-gantt-axis {
+      grid-template-columns: var(--gantt-label-width) minmax(220px, 1fr);
+    }
+
+    .log-analysis-gantt-row {
+      grid-template-columns: var(--gantt-label-width) minmax(220px, 1fr);
+      align-items: start;
+    }
+
+    .log-analysis-gantt-info {
+      grid-column: 2;
+      padding-left: 0;
+    }
+
+    .log-analysis-gantt-meta strong {
+      font-size: 12px;
+    }
+
+    .log-analysis-gantt-meta span {
+      font-size: 10px;
+    }
+  }
+}

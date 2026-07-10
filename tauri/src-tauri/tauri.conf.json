@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "CinnaTool",
+  "version": "1.0.0",
+  "identifier": "com.cinna.tools.tauri",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build",
+    "devUrl": "http://localhost:5174",
+    "frontendDist": "../dist-renderer"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "CinnaTool",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 400,
+        "minHeight": 300,
+        "decorations": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": 18,
+          "y": 18
+        },
+        "backgroundColor": "#fbfbfa"
+      }
+    ],
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$HOME/**",
+          "$APPDATA/**",
+          "$APPLOCALDATA/**",
+          "$DOCUMENT/**",
+          "$DOWNLOAD/**",
+          "$PICTURE/**",
+          "$VIDEO/**"
+        ]
+      },
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost blob: data:; media-src 'self' asset: http://asset.localhost blob: data:; connect-src 'self' ipc: http://ipc.localhost https: http://localhost:* ws://localhost:*"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../src/assets/icon.png",
+      "../src/assets/icon.icns",
+      "../src/assets/icon.ico"
+    ]
+  }
+}

@@ -1,7 +1,15 @@
 node_modules/
+.vite/
+electron/node_modules/
+tauri/node_modules/
 dist/
 dist-renderer/
 release/
+electron/dist/
+electron/dist-renderer/
+electron/release/
+tauri/dist-renderer/
+tauri/src-tauri/target/
 *.log
 .DS_Store
 .env

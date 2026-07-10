@@ -1,0 +1,30 @@
+@layer components {
+  .ai-settings-form {
+    width: min(100%, 760px);
+    padding: 24px;
+  }
+
+  .ai-settings-description {
+    display: block;
+    line-height: 1.7;
+  }
+
+  .ai-settings-form .ant-divider {
+    margin-block: 24px 18px;
+  }
+
+  .ai-settings-form .ant-form-item:last-of-type {
+    margin-bottom: 28px;
+  }
+
+  .chat-settings-number-input {
+    width: 100%;
+  }
+
+  @media (max-width: 799px) {
+    .ai-settings-form {
+      width: 100%;
+      padding: 20px;
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "cinna-tools",
+  "version": "1.0.0",
+  "description": "CinnaTool - AI Chat & Todo Desktop Application",
+  "main": "dist/main.js",
+  "scripts": {
+    "clean": "node scripts/clean-build.mjs dist dist-renderer",
+    "clean:release": "node scripts/clean-build.mjs release",
+    "dev": "node scripts/dev.js",
+    "dev:renderer": "vite",
+    "dev:electron": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron dist/main.js",
+    "build": "pnpm clean && tsc -p tsconfig.electron.json && vite build",
+    "start": "tsc -p tsconfig.electron.json && vite build && electron dist/main.js",
+    "start:watch": "node scripts/dev.js",
+    "pack": "pnpm build && electron-builder --dir",
+    "dist": "pnpm build && electron-builder",
+    "dist:win": "pnpm clean:release && pnpm build && electron-builder --win nsis --x64",
+    "build:win": "pnpm dist:win",
+    "build:mac": "pnpm build && electron-builder --mac",
+    "build:linux": "pnpm build && electron-builder --linux"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "typescript",
+    "ai-chat",
+    "todo"
+  ],
+  "author": "Cinna",
+  "license": "MIT",
+  "devDependencies": {
+    "@ant-design/icons": "^6.2.4",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "antd": "^6.4.3",
+    "dayjs": "^1.11.21",
+    "electron": "^42.3.3",
+    "electron-builder": "^26.15.3",
+    "electron-store": "^11.0.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.8.3",
+    "uuid": "^14.0.0",
+    "vite": "^8.0.16",
+    "zustand": "^5.0.14"
+  }
+}
