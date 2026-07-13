@@ -5,6 +5,7 @@
   "windows": ["main", "clipboard-floating"],
   "permissions": [
     "core:window:default",
+    "core:window:allow-start-dragging",
     "core:event:default",
     "dialog:allow-open",
     "opener:allow-open-url",

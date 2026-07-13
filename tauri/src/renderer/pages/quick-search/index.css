@@ -3,7 +3,7 @@
     height: 100%;
     display: none;
     flex-direction: column;
-    min-width: 800px;
+    min-width: 0;
     overflow: hidden;
     background: var(--shell-main-bg);
     color: var(--text-primary);
@@ -53,11 +53,14 @@
   }
 
   .quick-search-controls {
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-    width: min(980px, 100%);
+    width: auto;
+    max-width: 980px;
+    flex: 1 1 560px;
   }
 
   .quick-search-controls .ant-input-affix-wrapper {
@@ -258,16 +261,12 @@
     padding: 24px;
   }
 
-  @media (max-width: 799px) {
-    .quick-search-page {
-      min-width: 560px;
-      overflow: auto;
-    }
-
+  @container app-content (max-width: 760px) {
     .quick-search-controls {
       flex-wrap: wrap;
       justify-content: flex-start;
       width: 100%;
+      max-width: none;
     }
 
     .quick-search-controls .ant-input-affix-wrapper {
@@ -281,14 +280,21 @@
       padding: 18px 18px 12px;
     }
 
+    .quick-search-body {
+      padding: 0 18px 18px;
+    }
+  }
+
+  @container app-content (max-width: 560px) {
     .quick-search-drop-zone,
     .quick-search-status {
       align-items: flex-start;
       flex-direction: column;
     }
 
-    .quick-search-body {
-      padding: 0 18px 18px;
+    .quick-search-progress-wrap {
+      width: 100%;
+      min-width: 0;
     }
   }
 }

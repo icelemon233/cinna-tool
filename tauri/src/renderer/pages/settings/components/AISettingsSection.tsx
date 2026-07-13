@@ -13,7 +13,7 @@ export function AISettingsSection({ models, onSave, settings, t }: AISettingsSec
   return (
     <section className="settings-section settings-ai-section">
       <h2 className="settings-section-title">{t('settings.aiSectionTitle')}</h2>
-      <div className="settings-card settings-ai-card">
+      <div className="settings-card">
         <AiSettingsForm models={models} onSave={onSave} settings={settings} />
       </div>
     </section>

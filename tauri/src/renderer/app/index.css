@@ -2,7 +2,7 @@
 
 @layer components {
   .app-shell {
-    @apply relative isolate flex h-screen flex-row overflow-hidden bg-[var(--shell-sidebar-bg)] text-[var(--text-primary)] transition-colors duration-200;
+    @apply relative isolate flex h-screen min-h-0 w-full min-w-0 flex-row overflow-hidden bg-[var(--shell-sidebar-bg)] text-[var(--text-primary)] transition-colors duration-200;
   }
 
   .app-shell > * {
@@ -10,7 +10,7 @@
   }
 
   .app-sidebar {
-    @apply flex w-[236px] shrink-0 flex-col overflow-hidden bg-[var(--shell-sidebar-bg)] px-2 pb-3.5 pt-[72px] transition-[width] duration-200 [scrollbar-width:none];
+    @apply flex min-h-0 w-[236px] shrink-0 flex-col overflow-hidden bg-[var(--shell-sidebar-bg)] px-2 pb-3.5 pt-[72px] transition-[width] duration-200 [scrollbar-width:none];
     -webkit-app-region: drag;
   }
 
@@ -24,6 +24,9 @@
   .app-sidebar .ant-menu {
     @apply overflow-hidden border-0 text-[var(--shell-sidebar-text)] shadow-none [scrollbar-width:none];
     width: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
     padding: 0;
     background: transparent !important;
     background-color: transparent !important;
@@ -108,6 +111,7 @@
 
   .app-sidebar-bottom {
     @apply mt-auto pt-2.5;
+    flex: 0 0 auto;
     -webkit-app-region: no-drag;
   }
 
@@ -136,7 +140,8 @@
   }
 
   .app-main-panel {
-    @apply relative isolate flex min-w-0 flex-1 flex-col overflow-hidden rounded-l-[18px] border-l border-[var(--shell-border)] backdrop-blur-[18px];
+    @apply relative isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-l-[18px] border-l border-[var(--shell-border)] backdrop-blur-[18px];
+    flex-basis: 0;
     background: var(--shell-main-bg);
   }
 
@@ -199,15 +204,16 @@
   }
 
   .app-content-area {
-    @apply flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent;
+    @apply flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-transparent;
+    container: app-content / inline-size;
   }
 
   .app-page-wrapper {
-    @apply min-h-0 flex-1 overflow-hidden;
+    @apply min-h-0 min-w-0 flex-1 overflow-hidden;
   }
 
   .app-page-slot {
-    @apply hidden h-full;
+    @apply hidden h-full min-h-0 w-full min-w-0 overflow-hidden;
   }
 
   .app-page-slot.is-active {
@@ -219,11 +225,10 @@
     @apply flex h-full min-h-0 items-center justify-center;
   }
 
-  @media (min-width: 800px) {
+  @media (min-width: 1040px) {
     .app-shell {
       flex-direction: row !important;
-      overflow-x: auto;
-      overflow-y: hidden;
+      overflow: hidden;
     }
 
     .app-sidebar {
@@ -238,7 +243,20 @@
     .app-sidebar .ant-menu {
       display: block !important;
       height: auto !important;
-      overflow: hidden !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      scrollbar-width: thin;
+      scrollbar-color: var(--shell-border) transparent;
+    }
+
+    .app-sidebar .ant-menu::-webkit-scrollbar {
+      width: 5px;
+      height: 0;
+    }
+
+    .app-sidebar .ant-menu::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: var(--shell-border);
     }
 
     .app-sidebar .ant-menu-item {
@@ -276,16 +294,9 @@
       padding-inline: 24px !important;
     }
 
-    .app-main-panel {
-      min-width: 800px;
-    }
-
-    .app-page-wrapper {
-      min-width: 800px;
-    }
   }
 
-  @media (max-width: 799px) {
+  @media (max-width: 1039px) {
     .app-shell {
       flex-direction: column-reverse !important;
       overflow: hidden;
@@ -300,11 +311,6 @@
       box-shadow: none;
     }
 
-    .app-content-area,
-    .app-page-wrapper {
-      overflow: auto;
-    }
-
     .app-sidebar {
       width: 100% !important;
       min-width: 0;
@@ -314,8 +320,7 @@
       align-items: center;
       gap: 6px;
       padding: 6px 8px !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
+      overflow: hidden !important;
       border-top: 1px solid var(--shell-border);
     }
 
@@ -330,6 +335,18 @@
       justify-content: flex-start !important;
       overflow-x: auto !important;
       overflow-y: hidden !important;
+      scrollbar-width: thin;
+      scrollbar-color: var(--shell-border) transparent;
+    }
+
+    .app-sidebar .ant-menu::-webkit-scrollbar {
+      width: 0;
+      height: 4px;
+    }
+
+    .app-sidebar .ant-menu::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: var(--shell-border);
     }
 
     .app-sidebar .ant-menu-item {

@@ -3,7 +3,7 @@
     height: 100%;
     display: none;
     flex-direction: column;
-    min-width: 800px;
+    min-width: 0;
     overflow: hidden;
     background: var(--shell-main-bg);
     color: var(--text-primary);
@@ -71,11 +71,19 @@
     gap: 22px;
     overflow: auto;
     padding: 0 32px 32px;
-    scrollbar-width: none;
+    scrollbar-width: thin;
   }
 
   .schedule-body::-webkit-scrollbar {
-    display: none;
+    width: 7px;
+    height: 7px;
+  }
+
+  .schedule-body::-webkit-scrollbar-thumb,
+  .schedule-side-panel::-webkit-scrollbar-thumb,
+  .schedule-work-list-body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--border-color);
   }
 
   .schedule-main,
@@ -167,14 +175,14 @@
     min-height: 0;
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    grid-template-rows: repeat(6, minmax(108px, 1fr));
+    grid-template-rows: repeat(6, minmax(0, 1fr));
     overflow: hidden;
   }
 
   .schedule-day-cell {
     position: relative;
     min-width: 0;
-    min-height: 108px;
+    min-height: 0;
     display: grid;
     grid-template-rows: 24px minmax(0, 1fr);
     gap: 5px;
@@ -310,9 +318,9 @@
   .schedule-side-panel {
     min-height: 0;
     display: grid;
-    grid-template-rows: auto minmax(188px, 1fr);
+    grid-template-rows: max-content minmax(188px, 1fr);
     gap: 16px;
-    overflow: visible;
+    overflow: auto;
     border: 0;
     background: transparent;
     backdrop-filter: none;
@@ -320,12 +328,13 @@
 
   .schedule-side-panel,
   .schedule-work-list-body {
-    scrollbar-width: none;
+    scrollbar-width: thin;
   }
 
   .schedule-side-panel::-webkit-scrollbar,
   .schedule-work-list-body::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+    height: 6px;
   }
 
   .schedule-editor,
@@ -339,6 +348,7 @@
   }
 
   .schedule-side-panel > .schedule-editor {
+    min-height: max-content;
     padding: 24px;
   }
 
@@ -504,7 +514,6 @@
     align-content: start;
     gap: 6px;
     overflow: auto;
-    overscroll-behavior: contain;
   }
 
   .schedule-work-row {
@@ -596,7 +605,7 @@
     opacity: 1;
   }
 
-  @media (max-width: 1180px) {
+  @container app-content (max-width: 860px) {
     .schedule-body {
       display: flex;
       flex-direction: column;
@@ -604,8 +613,8 @@
     }
 
     .schedule-main {
-      min-height: 680px;
-      flex: 0 0 680px;
+      min-height: 560px;
+      flex: 0 0 clamp(560px, calc(100vh - 180px), 640px);
     }
 
     .schedule-side-panel {
@@ -620,12 +629,14 @@
     }
   }
 
-  @media (max-width: 799px) {
-    .schedule-page {
-      min-width: 720px;
-      overflow: auto;
+  @container app-content (max-width: 680px) {
+    .schedule-side-panel {
+      grid-template-columns: 1fr;
+      grid-template-rows: max-content minmax(220px, max-content);
     }
+  }
 
+  @container app-content (max-width: 560px) {
     .schedule-header {
       align-items: stretch;
       flex-direction: column;
@@ -646,21 +657,13 @@
     }
 
     .schedule-main {
-      min-height: 660px;
-      flex-basis: 660px;
-    }
-
-    .schedule-calendar-grid {
-      grid-template-rows: repeat(6, minmax(108px, 1fr));
+      min-height: 540px;
+      flex-basis: 540px;
     }
 
     .schedule-day-cell {
-      min-height: 108px;
       padding: 7px;
     }
 
-    .schedule-side-panel {
-      grid-template-columns: 1fr;
-    }
   }
 }

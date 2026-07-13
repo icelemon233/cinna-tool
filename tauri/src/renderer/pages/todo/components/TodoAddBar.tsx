@@ -17,14 +17,14 @@ const TodoAddBar: React.FC<TodoAddBarProps> = ({ quickCreateKey = 0 }) => {
 
   useEffect(() => {
     if (editing) {
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
     }
   }, [editing]);
 
   useEffect(() => {
     if (quickCreateKey <= 0) return;
     setEditing(true);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
+    window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
   }, [quickCreateKey]);
 
   const handleSubmit = () => {

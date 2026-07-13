@@ -1,12 +1,15 @@
 @layer components {
   .floating-tools-window {
     height: 100vh;
+    min-height: 0;
     overflow: hidden;
+    container: app-content / inline-size;
     background: var(--shell-main-bg);
   }
 
   .floating-tools-tabs.ant-tabs {
     height: 100%;
+    min-height: 0;
   }
 
   .floating-tools-tabs > .ant-tabs-nav {
@@ -26,7 +29,13 @@
     padding: 9px 2px;
   }
 
-  .floating-tools-tabs > .ant-tabs-content-holder,
+  .floating-tools-tabs > .ant-tabs-content-holder {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+  }
+
   .floating-tools-tabs > .ant-tabs-content-holder > .ant-tabs-content,
   .floating-tools-tabs > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane {
     min-height: 0;

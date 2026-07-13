@@ -83,7 +83,7 @@ const TranslationPage: React.FC<TranslationPageProps> = ({ mode = 'main' }) => {
 
   useEffect(() => {
     if (!isCompact) return undefined;
-    const timer = window.setTimeout(() => inputRef.current?.focus(), 80);
+    const timer = window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 80);
     return () => window.clearTimeout(timer);
   }, [isCompact]);
 
@@ -144,7 +144,7 @@ const TranslationPage: React.FC<TranslationPageProps> = ({ mode = 'main' }) => {
     setSourceText('');
     setTranslatedText('');
     setError('');
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   };
 
   const handleRestoreMain = async () => {
@@ -236,7 +236,6 @@ const TranslationPage: React.FC<TranslationPageProps> = ({ mode = 'main' }) => {
             </div>
             <Input.TextArea
               ref={inputRef}
-              autoFocus={isCompact}
               className="translation-textarea"
               placeholder={t('translation.inputPlaceholder')}
               value={sourceText}

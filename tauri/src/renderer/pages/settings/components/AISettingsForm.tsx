@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Divider, Form, Input, InputNumber, Select, Slider, Typography } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { Button, Input, InputNumber, Select, Slider, Typography } from 'antd';
+import {
+  ApiOutlined,
+  ExperimentOutlined,
+  FileTextOutlined,
+  FilterOutlined,
+  KeyOutlined,
+  LinkOutlined,
+  MessageOutlined,
+  NumberOutlined,
+  RobotOutlined,
+  SaveOutlined,
+  TagOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from '@/shared/i18n';
 import type { ChatSettings } from '@/shared/store/chatStore';
 import type { ModelInfo } from '@/shared/types/platform';
@@ -10,6 +22,50 @@ interface AiSettingsFormProps {
   settings: ChatSettings;
   models: ModelInfo[];
   onSave: (settings: Partial<ChatSettings>) => void;
+}
+
+interface AiSettingRowProps {
+  children: React.ReactNode;
+  controlClassName?: string;
+  controlId?: string;
+  description: string;
+  icon: React.ReactNode;
+  rowClassName?: string;
+  title: string;
+  value?: string;
+}
+
+function AiSettingRow({
+  children,
+  controlClassName,
+  controlId,
+  description,
+  icon,
+  rowClassName,
+  title,
+  value,
+}: AiSettingRowProps) {
+  return (
+    <div className={['settings-row', 'ai-settings-row', rowClassName].filter(Boolean).join(' ')}>
+      <div className="settings-row-main">
+        <div className="settings-row-title">
+          {icon}
+          {controlId ? <label htmlFor={controlId}>{title}</label> : <span>{title}</span>}
+          {value && <span className="ai-settings-value">{value}</span>}
+        </div>
+        <Typography.Text className="settings-row-desc" type="secondary">
+          {description}
+        </Typography.Text>
+      </div>
+      <div
+        className={['settings-row-control', 'ai-settings-control', controlClassName]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 const AiSettingsForm: React.FC<AiSettingsFormProps> = ({
@@ -71,14 +127,16 @@ const AiSettingsForm: React.FC<AiSettingsFormProps> = ({
   };
 
   return (
-    <Form className="ai-settings-form" layout="vertical">
-      <Typography.Text className="ai-settings-description" type="secondary">
-        {t('chat.settingsDesc')}
-      </Typography.Text>
-      <Divider>{t('chat.connectionSettings')}</Divider>
-
-      <Form.Item label={t('chat.selectModel')}>
+    <div className="ai-settings-form">
+      <AiSettingRow
+        controlId="ai-model-select"
+        description={t('chat.selectModelDesc')}
+        icon={<RobotOutlined />}
+        title={t('chat.selectModel')}
+      >
         <Select
+          aria-label={t('chat.selectModel')}
+          id="ai-model-select"
           value={modelId}
           onChange={handleModelChange}
           options={[
@@ -86,80 +144,135 @@ const AiSettingsForm: React.FC<AiSettingsFormProps> = ({
             ...models.map((model) => ({ value: model.id, label: model.name })),
           ]}
         />
-      </Form.Item>
+      </AiSettingRow>
 
       {isCustom && (
         <>
-          <Form.Item label={t('chat.apiAddress')}>
+          <AiSettingRow
+            controlId="ai-api-address"
+            description={t('chat.apiAddressDesc')}
+            icon={<LinkOutlined />}
+            title={t('chat.apiAddress')}
+          >
             <Input
+              aria-label={t('chat.apiAddress')}
+              id="ai-api-address"
               type="url"
               value={baseUrl}
               onChange={(event) => setBaseUrl(event.target.value)}
               placeholder="https://api.example.com/v1"
             />
-          </Form.Item>
+          </AiSettingRow>
 
-          <Form.Item label={t('chat.modelName')}>
+          <AiSettingRow
+            controlId="ai-model-name"
+            description={t('chat.modelNameDesc')}
+            icon={<TagOutlined />}
+            title={t('chat.modelName')}
+          >
             <Input
+              aria-label={t('chat.modelName')}
+              id="ai-model-name"
               value={modelName}
               onChange={(event) => setModelName(event.target.value)}
               placeholder="gpt-4o"
             />
-          </Form.Item>
+          </AiSettingRow>
         </>
       )}
 
-      <Form.Item label={t('settings.apiKey')}>
+      <AiSettingRow
+        controlId="ai-api-key"
+        description={t('chat.apiKeyDesc')}
+        icon={<KeyOutlined />}
+        title={t('settings.apiKey')}
+      >
         <Input.Password
+          aria-label={t('settings.apiKey')}
+          id="ai-api-key"
           value={apiKey}
           onChange={(event) => setApiKey(event.target.value)}
           placeholder="sk-..."
         />
-      </Form.Item>
+      </AiSettingRow>
 
-      <Form.Item label={t('chat.chatName')}>
+      <AiSettingRow
+        controlId="ai-chat-name"
+        description={t('chat.chatNameDesc')}
+        icon={<MessageOutlined />}
+        title={t('chat.chatName')}
+      >
         <Input
+          aria-label={t('chat.chatName')}
+          id="ai-chat-name"
           value={chatName}
           onChange={(event) => setChatName(event.target.value)}
           placeholder={t('chat.chatName')}
         />
-      </Form.Item>
+      </AiSettingRow>
 
-      <Divider>{t('chat.promptSettings')}</Divider>
-
-      <Form.Item label={t('chat.systemPrompt')}>
+      <AiSettingRow
+        controlId="ai-system-prompt"
+        description={t('chat.systemPromptDesc')}
+        icon={<FileTextOutlined />}
+        rowClassName="ai-settings-row--textarea"
+        title={t('chat.systemPrompt')}
+      >
         <Input.TextArea
+          aria-label={t('chat.systemPrompt')}
+          id="ai-system-prompt"
           value={systemPrompt}
           autoSize={{ minRows: 4, maxRows: 7 }}
           onChange={(event) => setSystemPrompt(event.target.value)}
           placeholder={t('chat.systemPromptPlaceholder')}
         />
-      </Form.Item>
+      </AiSettingRow>
 
-      <Divider>{t('chat.generationSettings')}</Divider>
-
-      <Form.Item label={`${t('chat.temperature')} ${temperature.toFixed(2)}`}>
+      <AiSettingRow
+        controlId="ai-temperature"
+        description={t('chat.temperatureDesc')}
+        icon={<ExperimentOutlined />}
+        title={t('chat.temperature')}
+        value={temperature.toFixed(2)}
+      >
         <Slider
+          aria-label={t('chat.temperature')}
+          id="ai-temperature"
           min={0}
           max={2}
           step={0.05}
           value={temperature}
           onChange={setTemperature}
         />
-      </Form.Item>
+      </AiSettingRow>
 
-      <Form.Item label={`${t('chat.topP')} ${topP.toFixed(2)}`}>
+      <AiSettingRow
+        controlId="ai-top-p"
+        description={t('chat.topPDesc')}
+        icon={<FilterOutlined />}
+        title={t('chat.topP')}
+        value={topP.toFixed(2)}
+      >
         <Slider
+          aria-label={t('chat.topP')}
+          id="ai-top-p"
           min={0}
           max={1}
           step={0.05}
           value={topP}
           onChange={setTopP}
         />
-      </Form.Item>
+      </AiSettingRow>
 
-      <Form.Item label={t('chat.maxTokens')}>
+      <AiSettingRow
+        controlId="ai-max-tokens"
+        description={t('chat.maxTokensDesc')}
+        icon={<NumberOutlined />}
+        title={t('chat.maxTokens')}
+      >
         <InputNumber
+          aria-label={t('chat.maxTokens')}
+          id="ai-max-tokens"
           className="chat-settings-number-input"
           min={256}
           max={8192}
@@ -167,12 +280,20 @@ const AiSettingsForm: React.FC<AiSettingsFormProps> = ({
           value={maxTokens}
           onChange={(value) => setMaxTokens(value ?? 4096)}
         />
-      </Form.Item>
+      </AiSettingRow>
 
-      <Button type="primary" block icon={<SaveOutlined />} onClick={handleSave}>
-        {t('settings.saveAI')}
-      </Button>
-    </Form>
+      <AiSettingRow
+        controlClassName="settings-row-control--button"
+        description={t('chat.settingsDesc')}
+        icon={<ApiOutlined />}
+        rowClassName="ai-settings-save-row"
+        title={t('settings.saveAI')}
+      >
+        <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>
+          {t('settings.saveAI')}
+        </Button>
+      </AiSettingRow>
+    </div>
   );
 };
 

@@ -38,7 +38,7 @@ const ChatPage: React.FC = () => {
   } = useChatStore();
 
   const { t } = useTranslation();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadModels();
@@ -50,7 +50,9 @@ const ChatPage: React.FC = () => {
   const currentMessages = activeConv?.messages || [];
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const messagesElement = messagesRef.current;
+    if (!messagesElement) return;
+    messagesElement.scrollTop = messagesElement.scrollHeight;
   }, [currentMessages]);
 
   const isConfigured = Boolean(settings.apiKey && settings.model && settings.baseUrl);
@@ -127,7 +129,7 @@ const ChatPage: React.FC = () => {
             inputProps={inputProps}
             isGenerating={isGenerating}
             messages={currentMessages}
-            messagesEndRef={messagesEndRef}
+            messagesRef={messagesRef}
           />
         )}
         <div className="chat-mobile-tool-dock">{renderToolPanel()}</div>

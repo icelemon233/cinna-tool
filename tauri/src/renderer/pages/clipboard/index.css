@@ -1,7 +1,7 @@
 @layer components {
   .clipboard-page {
     height: 100%;
-    min-width: 800px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -283,14 +283,19 @@
 
   .clipboard-body,
   .clipboard-grid {
-    scrollbar-width: none;
+    scrollbar-width: thin;
   }
 
   .clipboard-body::-webkit-scrollbar,
   .clipboard-grid::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
+    width: 7px;
+    height: 7px;
+  }
+
+  .clipboard-body::-webkit-scrollbar-thumb,
+  .clipboard-grid::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--border-color);
   }
 
   .clipboard-page.is-floating .clipboard-grid {
@@ -389,7 +394,7 @@
     padding: 0;
   }
 
-  @media (max-width: 980px) {
+  @container app-content (max-width: 740px) {
     .clipboard-body {
       grid-template-columns: 1fr;
     }
@@ -400,6 +405,26 @@
 
     .clipboard-page.is-floating .clipboard-compose-panel {
       min-height: 0;
+    }
+  }
+
+  @container app-content (max-width: 560px) {
+    .clipboard-header {
+      align-items: stretch;
+      flex-direction: column;
+      padding: 18px 18px 12px;
+    }
+
+    .clipboard-toolbar {
+      justify-content: flex-start;
+    }
+
+    .clipboard-body {
+      padding: 0 18px 20px;
+    }
+
+    .clipboard-compose-panel {
+      min-height: 320px;
     }
   }
 }

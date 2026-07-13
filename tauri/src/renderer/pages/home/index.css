@@ -2,7 +2,7 @@
   height: 100%;
   display: none;
   flex-direction: column;
-  min-width: 800px;
+  min-width: 0;
   overflow: hidden;
   background: transparent;
   color: var(--text-primary);
@@ -266,18 +266,13 @@
   }
 }
 
-@media (max-width: 1020px) {
+@container app-content (max-width: 760px) {
   .home-dashboard-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 799px) {
-  .home-page {
-    min-width: 560px;
-    overflow: auto;
-  }
-
+@container app-content (max-width: 560px) {
   .home-header {
     align-items: stretch;
     flex-direction: column;

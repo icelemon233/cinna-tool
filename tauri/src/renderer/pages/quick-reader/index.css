@@ -3,7 +3,7 @@
     height: 100%;
     display: none;
     flex-direction: column;
-    min-width: 800px;
+    min-width: 0;
     overflow: hidden;
     background: var(--shell-main-bg);
     color: var(--text-primary);
@@ -437,16 +437,29 @@
     color: color-mix(in srgb, var(--text-secondary) 72%, transparent);
   }
 
-  @media (max-width: 799px) {
-    .quick-reader-page {
-      min-width: 560px;
-      overflow: auto;
-    }
-
+  @container app-content (max-width: 720px) {
     .quick-reader-header {
-      align-items: flex-start;
+      align-items: stretch;
       flex-direction: column;
       padding: 18px 18px 12px;
+    }
+
+    .quick-reader-actions {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .quick-reader-search-bar {
+      min-width: 0;
+      max-width: 100%;
+      flex: 1 1 360px;
+    }
+
+    .quick-reader-search-input {
+      width: auto;
+      min-width: 0;
+      flex: 1 1 auto;
     }
 
     .quick-reader-body {

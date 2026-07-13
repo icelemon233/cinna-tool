@@ -9,18 +9,18 @@ interface ChatConversationViewProps {
   inputProps: ChatInputProps;
   isGenerating: boolean;
   messages: Message[];
-  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  messagesRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function ChatConversationView({
   inputProps,
   isGenerating,
   messages,
-  messagesEndRef,
+  messagesRef,
 }: ChatConversationViewProps) {
   return (
     <>
-      <div className="chat-messages">
+      <div className="chat-messages" ref={messagesRef}>
         {messages.map((message, index) => (
           <ChatMessage
             key={message.id}
@@ -28,7 +28,6 @@ export function ChatConversationView({
             isGenerating={isGenerating && index === messages.length - 1}
           />
         ))}
-        <div ref={messagesEndRef} />
       </div>
       <ChatInput {...inputProps} />
     </>

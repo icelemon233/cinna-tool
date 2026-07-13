@@ -177,7 +177,7 @@
     }
   }
 
-  @media (max-width: 640px) {
+  @container app-content (max-width: 640px) {
     .chat-message {
       max-width: 96%;
       gap: 8px;

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Input, Space, Tag, Typography, type InputRef } from 'antd';
+import React, { useState } from 'react';
+import { Button, Input, Space, Tag, Typography } from 'antd';
 import { ExperimentOutlined, PauseOutlined, RobotOutlined, SendOutlined } from '@ant-design/icons';
 import { useTranslation } from '@/shared/i18n';
 import './ChatInput.css';
@@ -28,14 +28,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onSkillsClick,
 }) => {
   const [text, setText] = useState('');
-  const inputRef = useRef<InputRef>(null);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    if (!isGenerating) {
-      inputRef.current?.focus();
-    }
-  }, [isGenerating]);
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -63,7 +56,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chat-input-surface">
           <div className="chat-input-textarea-slot">
             <Input.TextArea
-              ref={inputRef}
               variant="borderless"
               placeholder={t('chat.inputPlaceholder')}
               autoSize={{ minRows: 3, maxRows: 8 }}

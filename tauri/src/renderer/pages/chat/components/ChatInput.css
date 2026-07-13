@@ -182,7 +182,7 @@
     font-size: 13px;
   }
 
-  @media (max-width: 640px) {
+  @container app-content (max-width: 640px) {
     .chat-input-area {
       padding: 12px 12px 14px;
     }
@@ -197,7 +197,7 @@
     }
   }
 
-  @media (max-width: 520px) {
+  @container app-content (max-width: 520px) {
     .chat-input-toolbar {
       gap: 8px;
     }

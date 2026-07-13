@@ -3,7 +3,7 @@
     --log-analysis-red: #f05b5b;
     --log-analysis-green: #3ccf72;
     height: 100%;
-    min-width: 800px;
+    min-width: 0;
     display: none;
     overflow: hidden;
     background: var(--shell-main-bg);
@@ -27,7 +27,8 @@
     flex-direction: column;
     gap: 14px;
     padding: 24px 18px;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     border-right: 1px solid var(--border-color);
     background: color-mix(in srgb, var(--shell-main-bg) 88%, var(--bg-card));
   }
@@ -281,7 +282,9 @@
   .log-analysis-main {
     min-width: 0;
     flex: 1;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    container: log-report / inline-size;
   }
 
   .log-analysis-empty-report {
@@ -320,6 +323,7 @@
     --diagnostic-danger-border: var(--diagnostic-red-border);
     --diagnostic-danger-bg: var(--diagnostic-red-bg);
     max-width: 1320px;
+    min-width: 0;
     min-height: 100%;
     display: flex;
     flex-direction: column;
@@ -335,6 +339,7 @@
   }
 
   .log-analysis-report-section {
+    min-width: 0;
     padding: 24px;
     border: 1px solid var(--diagnostic-border-soft);
     border-radius: 12px;
@@ -1805,16 +1810,14 @@
     word-break: break-word;
   }
 
-  @media (max-width: 1040px) {
-    .log-analysis-page {
-      min-width: 680px;
-    }
-
+  @container app-content (max-width: 1040px) {
     .log-analysis-control {
       width: 292px;
       min-width: 292px;
     }
+  }
 
+  @container log-report (max-width: 760px) {
     .log-analysis-metric-grid,
     .log-analysis-issue-list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1867,10 +1870,38 @@
     }
   }
 
-  @media (max-width: 799px) {
+  @container log-report (max-width: 700px) {
+    .log-analysis-gantt {
+      --gantt-label-width: 122px;
+    }
+
+    .log-analysis-gantt-axis {
+      grid-template-columns: var(--gantt-label-width) minmax(220px, 1fr);
+    }
+
+    .log-analysis-gantt-row {
+      grid-template-columns: var(--gantt-label-width) minmax(220px, 1fr);
+      align-items: start;
+    }
+
+    .log-analysis-gantt-info {
+      grid-column: 2;
+      padding-left: 0;
+    }
+
+    .log-analysis-gantt-meta strong {
+      font-size: 12px;
+    }
+
+    .log-analysis-gantt-meta span {
+      font-size: 10px;
+    }
+  }
+
+  @container app-content (max-width: 800px) {
     .log-analysis-page {
-      min-width: 560px;
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
       flex-direction: column;
     }
 
@@ -1888,7 +1919,9 @@
     .log-analysis-report {
       padding: 20px 18px 30px;
     }
+  }
 
+  @container log-report (max-width: 620px) {
     .log-analysis-metric-grid,
     .log-analysis-issue-list,
     .log-analysis-network-diagnosis-grid {
@@ -1928,32 +1961,6 @@
     .log-analysis-section-header {
       align-items: flex-start;
       flex-direction: column;
-    }
-
-    .log-analysis-gantt {
-      --gantt-label-width: 122px;
-    }
-
-    .log-analysis-gantt-axis {
-      grid-template-columns: var(--gantt-label-width) minmax(220px, 1fr);
-    }
-
-    .log-analysis-gantt-row {
-      grid-template-columns: var(--gantt-label-width) minmax(220px, 1fr);
-      align-items: start;
-    }
-
-    .log-analysis-gantt-info {
-      grid-column: 2;
-      padding-left: 0;
-    }
-
-    .log-analysis-gantt-meta strong {
-      font-size: 12px;
-    }
-
-    .log-analysis-gantt-meta span {
-      font-size: 10px;
     }
   }
 }

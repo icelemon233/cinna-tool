@@ -771,7 +771,7 @@ const App: React.FC = () => {
           data-has-dynamic-wallpaper={dynamicWallpaperFile ? 'true' : 'false'}
           style={{ '--wallpaper-opacity': wallpaperOpacity } as React.CSSProperties}
         >
-          <aside className="app-sidebar">
+          <aside className="app-sidebar" data-tauri-drag-region="deep">
             <Menu
               className="app-nav-menu"
               mode="inline"

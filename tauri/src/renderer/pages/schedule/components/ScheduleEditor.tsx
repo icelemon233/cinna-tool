@@ -48,7 +48,8 @@ export function ScheduleEditor({
   ];
 
   useEffect(() => {
-    titleInputRef.current?.focus({ cursor: 'end' });
+    if (focusKey <= 0) return;
+    titleInputRef.current?.focus({ cursor: 'end', preventScroll: true });
   }, [focusKey]);
 
   const handleStartDateChange = (date: dayjs.Dayjs | null) => {

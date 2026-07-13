@@ -18,14 +18,14 @@ const TopBar: React.FC<TopBarProps> = ({ onOpenSettings }) => {
 
   return (
     <header className="topbar">
-      <div className="topbar-row">
+      <div className="topbar-row" data-tauri-drag-region="deep">
         <img
           className={`topbar-logo${isDarkTheme ? ' is-dark' : ''}`}
           src={isDarkTheme ? logoWhite : logoBlack}
           alt="CinnaTool"
         />
 
-        <div className="topbar-actions">
+        <div className="topbar-actions" data-tauri-drag-region="false">
           <Button
             className="topbar-action-button"
             aria-label={t('nav.settings')}
